@@ -50,7 +50,7 @@
             document.getElementById("readResult").innerHTML=contents;
             // select paths for build path tree
             var tds = document.getElementsByTagName("td");
-            console.log(tds)
+            // console.log(tds)
             for(var i=0;i<tds.length;i++){
               // path information
               var pathLine = tds[i].childNodes[0].data;
@@ -69,13 +69,15 @@
               if(codeFileCollection[pathLine.split(" ")[25]] === undefined){
                 codeFileCollection[pathLine.split(" ")[25]] = [];
               }
-              codeFileCollection[pathLine.split(" ")[25]].push(code);
+              var cloneclass = tds[i].parentNode.parentNode.parentNode.previousElementSibling.innerText;
+              // console.log(cloneclass)
+              codeFileCollection[pathLine.split(" ")[25]].push([cloneclass,code]);
 
               // document.getElementById("pathResult").innerText+=path;
             }
         };
         reader.readAsText(NicadReport);
-        console.log(pathCollection);
+        // console.log(pathCollection);
         console.log(codeFileCollection)
       }
     </script>
