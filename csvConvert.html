@@ -69,16 +69,16 @@
               if(codeFileCollection[pathLine.split(" ")[25]] === undefined){
                 codeFileCollection[pathLine.split(" ")[25]] = [];
               }
-              var cloneclass = tds[i].parentNode.parentNode.parentNode.previousElementSibling.innerText;
-              // console.log(cloneclass)
-              codeFileCollection[pathLine.split(" ")[25]].push([cloneclass,code]);
-
-              // document.getElementById("pathResult").innerText+=path;
+              // get class information by dom operation
+              var cloneclass = tds[i].parentNode.parentNode.parentNode.previousElementSibling.innerText.split(" ")[2];
+              // remove last comma
+              var cloneClassNumber = cloneclass.substring(0,cloneclass.length-1);
+              codeFileCollection[pathLine.split(" ")[25]].push([cloneClassNumber,code]);
             }
         };
         reader.readAsText(NicadReport);
         // console.log(pathCollection);
-        console.log(codeFileCollection)
+        // console.log(codeFileCollection)
       }
     </script>
     <div>
