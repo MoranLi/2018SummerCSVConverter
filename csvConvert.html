@@ -4,29 +4,55 @@
   </head>
   <body>
     <script>
+      // variable store user`s input file object
       var NicadReport;
       var GcadReport;
+      // initialize file object with check file type of file user uploaded
       function initializeFile(){
-        // initialize file object
-
         Nicad = document.getElementById("NicadFile").files[0];
         Gcad = document.getElementById("GcadFile").files[0];
+        // check uploaded file type
         if(Nicad.type !== "text/html" || Gcad.type !== "text/plain"){
           alert("illegal File type");
+          return false;
         }
         else{
           NicadReport = Nicad;
           GcadReport = Gcad;
-          console.log(NicadReport);
-          console.log(GcadReport);
+          return true;
         }
+      }
+      // initialize file and load content to dom
+      function ReadFile(){
+        // if load file fail, quit
+        if(!initializeFile()){
+          return;
+        }
+        // read NicadReport
+        // FileReader usage example: https://stackoverflow.com/questions/12371970/read-text-file-using-filereader
+        var reader = new FileReader();
+        reader.onload = function(event)
+        {
+            var contents = event.target.result;
+            var lines = contents.split('\n');
+            // add content to div for future dom usage
+            document.getElementById("readResult").innerHTML=contents;
+            // select paths for build path tree
+            var tds = document.getElementsByTagName("td");
+            for(var i=0;i<tds.length;i++){
+              var path = tds[i].childNodes[0].data
+              document.getElementById("pathResult").innerText+=path;
+            }
+        };
+        reader.readAsText(NicadReport);
       }
     </script>
     <div>
       <label>Submit Nicad Clone Report</label><input id="NicadFile" name="cloneReport" type="file" accept=".html">
       <label>Submit Gcad Report</label><input id="GcadFile" name="cloneReport" type="file" accept=".txt">
-      <button onclick="initializeFile()">Submit</button> 
+      <button onclick="ReadFile()">Submit</button> 
     </div>
-    
+    <div id="readResult"></div>
+    <div id="pathResult"></div>
   </body>
 </html>
