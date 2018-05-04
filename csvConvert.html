@@ -9,6 +9,7 @@
       var GcadReport;
       // variable to store path information
       var pathCollection = [[]];
+      var codeFileCollection = {};
       // find common substring to find path
       function findCommonSubstring(s1, s2){
         for(var i=0;i<Math.min(s1.length,s2.length);i++){
@@ -49,8 +50,10 @@
             document.getElementById("readResult").innerHTML=contents;
             // select paths for build path tree
             var tds = document.getElementsByTagName("td");
+            console.log(tds)
             for(var i=0;i<tds.length;i++){
-              var pathLine = tds[i].childNodes[0].data
+              // path information
+              var pathLine = tds[i].childNodes[0].data;
               // 25 is counted from pathLine.split() result
               var path = pathLine.split(" ")[25].split("/");
               path.forEach(function(p,i){
@@ -60,12 +63,20 @@
                 if(pathCollection[i].indexOf(p) == -1){
                   pathCollection[i].push(p);
                 }
-              })              
+              })
+              // code information
+              var code = tds[i].childNodes[1].innerText;
+              if(codeFileCollection[pathLine.split(" ")[25]] === undefined){
+                codeFileCollection[pathLine.split(" ")[25]] = [];
+              }
+              codeFileCollection[pathLine.split(" ")[25]].push(code);
+
               // document.getElementById("pathResult").innerText+=path;
             }
         };
         reader.readAsText(NicadReport);
         console.log(pathCollection);
+        console.log(codeFileCollection)
       }
     </script>
     <div>
