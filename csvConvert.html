@@ -1,0 +1,32 @@
+<html>
+  <head>
+
+  </head>
+  <body>
+    <script>
+      var NicadReport;
+      var GcadReport;
+      function initializeFile(){
+        // initialize file object
+
+        Nicad = document.getElementById("NicadFile").files[0];
+        Gcad = document.getElementById("GcadFile").files[0];
+        if(Nicad.type !== "text/html" || Gcad.type !== "text/plain"){
+          alert("illegal File type");
+        }
+        else{
+          NicadReport = Nicad;
+          GcadReport = Gcad;
+          console.log(NicadReport);
+          console.log(GcadReport);
+        }
+      }
+    </script>
+    <div>
+      <label>Submit Nicad Clone Report</label><input id="NicadFile" name="cloneReport" type="file" accept=".html">
+      <label>Submit Gcad Report</label><input id="GcadFile" name="cloneReport" type="file" accept=".txt">
+      <button onclick="initializeFile()">Submit</button> 
+    </div>
+    
+  </body>
+</html>
