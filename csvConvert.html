@@ -8,7 +8,15 @@
       var NicadReport;
       var GcadReport;
       // variable to store path information
-      var pathCollection = [];
+      var pathCollection = [[]];
+      // find common substring to find path
+      function findCommonSubstring(s1, s2){
+        for(var i=0;i<Math.min(s1.length,s2.length);i++){
+          if(s1[i] !== s2[i]){
+            return s1.subString(0,i-1);
+          }
+        }
+      }
       // initialize file object with check file type of file user uploaded
       function initializeFile(){
         Nicad = document.getElementById("NicadFile").files[0];
@@ -44,8 +52,15 @@
             for(var i=0;i<tds.length;i++){
               var pathLine = tds[i].childNodes[0].data
               // 25 is counted from pathLine.split() result
-              var path = pathLine.split(" ")[25];
-              pathCollection.push(path);              
+              var path = pathLine.split(" ")[25].split("/");
+              path.forEach(function(p,i){
+                if(pathCollection[i] === undefined){
+                  pathCollection.push([]);
+                }
+                if(pathCollection[i].indexOf(p) == -1){
+                  pathCollection[i].push(p);
+                }
+              })              
               // document.getElementById("pathResult").innerText+=path;
             }
         };
