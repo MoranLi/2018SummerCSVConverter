@@ -7,6 +7,8 @@
       // variable store user`s input file object
       var NicadReport;
       var GcadReport;
+      // variable to store path information
+      var pathCollection = [];
       // initialize file object with check file type of file user uploaded
       function initializeFile(){
         Nicad = document.getElementById("NicadFile").files[0];
@@ -40,11 +42,15 @@
             // select paths for build path tree
             var tds = document.getElementsByTagName("td");
             for(var i=0;i<tds.length;i++){
-              var path = tds[i].childNodes[0].data
-              document.getElementById("pathResult").innerText+=path;
+              var pathLine = tds[i].childNodes[0].data
+              // 25 is counted from pathLine.split() result
+              var path = pathLine.split(" ")[25];
+              pathCollection.push(path);              
+              // document.getElementById("pathResult").innerText+=path;
             }
         };
         reader.readAsText(NicadReport);
+        console.log(pathCollection);
       }
     </script>
     <div>
