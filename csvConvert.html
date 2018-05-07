@@ -8,29 +8,28 @@
       var NicadReport;
       var GcadReport;
       // variable to store path information
+      // the file data is stored as a array of arrays
+      // each row represent a level
+      // first level is all space, represent start level (avoid file exist in first level, bad to visualizae
+      // each level is a node with a file name / folder name
+      // if a level have below level fill with space, means reach end level
+      // combine first to last-2 level is the whole file system
       var dataCollection = [[]];
-      // find common substring to find path
-      function findCommonSubstring(s1, s2){
-        for(var i=0;i<Math.min(s1.length,s2.length);i++){
-          if(s1[i] !== s2[i]){
-            return s1.subString(0,i-1);
-          }
-        }
-      }
       // initialize file object with check file type of file user uploaded
       function initializeFile(){
-        Nicad = document.getElementById("NicadFile").files[0];
-        Gcad = document.getElementById("GcadFile").files[0];
+        NicadReport = document.getElementById("NicadFile").files[0];
+        GcadReport = document.getElementById("GcadFile").files[0];
+        // check file is selected
+        if(NicadReport == undefined || GcadReport == undefined){
+          alert("file is not submitted !");
+          return false;
+        }
         // check uploaded file type
-        if(Nicad.type !== "text/html" || Gcad.type !== "text/plain"){
+        if(NicadReport.type !== "text/html" || GcadReport.type !== "text/plain"){
           alert("illegal File type");
           return false;
         }
-        else{
-          NicadReport = Nicad;
-          GcadReport = Gcad;
-          return true;
-        }
+        return true;
       }
       // csv generate example: https://jsfiddle.net/jossef/m3rrLzk0/
       function exportToCsv(filename, rows) {
@@ -57,7 +56,8 @@
         var blob = new Blob([csvFile], { type: 'text/csv;charset=utf-8;' });
         if (navigator.msSaveBlob) { // IE 10+
             navigator.msSaveBlob(blob, filename);
-        } else {
+        } 
+        else {
             var link = document.createElement("a");
             if (link.download !== undefined) { // feature detection
                 // Browsers that support HTML5 download attribute
@@ -70,7 +70,7 @@
                 document.body.removeChild(link);
             }
         }
-    }
+      }
       // initialize file and load content to dom
       function ReadFile(){
         // if load file fail, quit
@@ -84,26 +84,32 @@
         {
             var contents = event.target.result;
             var lines = contents.split('\n');
-            // add content to div for future dom usage
+            // add content to div for dom usage
             document.getElementById("readResult").innerHTML=contents;
             // select paths for build path tree
             var tds = document.getElementsByTagName("td");
+            // first loop, get file path information
             for(var i=0;i<tds.length;i++){
               // path information
               var pathLine = tds[i].childNodes[0].data;
               // 25 is counted from pathLine.split() result
               var path = pathLine.split(" ")[25].split("/");
               path.forEach(function(p,j){
+                // make first row to empty space represent root dictonary
                 if(j == 0){
                   dataCollection[j].push(" ")
                 }
                 else{
+                  // if new row(deeper level of file tree) is created
                   if(dataCollection[j] === undefined){
                     dataCollection.push([]);
+                    // fill previous space with space represent no more deeper level file
                     for(var k = 0;k<i;k++){
                       dataCollection[j].push(" ")
                     }
                   }
+                  // if there exist a deep level is revisit after several higher level file
+                  // fill space to meantion level before is already end
                   if(j==path.length-1 && j<dataCollection.length-1){
                     for(var m = j+1;m<dataCollection.length;m++){
                       dataCollection[m].push(" ")
@@ -113,35 +119,41 @@
                 }
               })
             }
+            // fill the last column with empty space, meaning the last-1 row is the file node and nothing below
             for(var i =dataCollection[dataCollection.length-1].length;i<dataCollection[dataCollection.length-2].length;i++){
               dataCollection[dataCollection.length-1].push("")
             }
+            // add empty array for store clone class & clone code
             dataCollection.push([])
             dataCollection.push([])
             for(var i=0;i<tds.length;i++){
               // code information
               var code = tds[i].childNodes[1].innerText;
+              // td <- tr <- tbody <- table == h3
+              // <- means left is child of right, == means left and right is sibling
+              // h3 contain clone class number and information
               var cloneclass = tds[i].parentNode.parentNode.parentNode.previousElementSibling.innerText.split(" ")[2];
               // remove last comma
               var cloneClassNumber = cloneclass.substring(0,cloneclass.length-1);
+              // store data to collection
               dataCollection[dataCollection.length-1].push(code)
               dataCollection[dataCollection.length-2].push(cloneClassNumber)
             }
+            // export data to csv file
             exportToCsv("data.csv",dataCollection)
         };
         reader.readAsText(NicadReport);
         console.log(dataCollection);
+        /*
+        // export to csv file, v2
         let csvContent = "data:text/csv;charset=utf-8,";
         dataCollection.forEach(function(rowArray){
-          console.log(rowArray)
           let row = rowArray.join(",");
-          console.log(row)
           csvContent += row + "\r\n";
         }); 
-        console.log(csvContent)
-        //var encodedUri = encodeURI(csvContent);
-        //window.open(encodedUri);
-        // exportToCsv("data.csv",dataCollection)
+        var encodedUri = encodeURI(csvContent);
+        window.open(encodedUri);
+        */
       }
     </script>
     <div>
