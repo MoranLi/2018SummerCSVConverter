@@ -8,8 +8,7 @@
       var NicadReport;
       var GcadReport;
       // variable to store path information
-      var pathCollection = [[]];
-      var codeFileCollection = {};
+      var dataCollection = [[]];
       // find common substring to find path
       function findCommonSubstring(s1, s2){
         for(var i=0;i<Math.min(s1.length,s2.length);i++){
@@ -33,6 +32,45 @@
           return true;
         }
       }
+      // csv generate example: https://jsfiddle.net/jossef/m3rrLzk0/
+      function exportToCsv(filename, rows) {
+        var processRow = function (row) {
+            var finalVal = '';
+            for (var j = 0; j < row.length; j++) {
+                var innerValue = row[j] === null ? '' : row[j].toString();
+                if (row[j] instanceof Date) {
+                    innerValue = row[j].toLocaleString();
+                };
+                var result = innerValue.replace(/"/g, '""');
+                if (result.search(/("|,|\n)/g) >= 0)
+                    result = '"' + result + '"';
+                if (j > 0)
+                    finalVal += ',';
+                finalVal += result;
+            }
+            return finalVal + '\n';
+        };
+        var csvFile = '';
+        for (var i = 0; i < rows.length; i++) {
+            csvFile += processRow(rows[i]);
+        }
+        var blob = new Blob([csvFile], { type: 'text/csv;charset=utf-8;' });
+        if (navigator.msSaveBlob) { // IE 10+
+            navigator.msSaveBlob(blob, filename);
+        } else {
+            var link = document.createElement("a");
+            if (link.download !== undefined) { // feature detection
+                // Browsers that support HTML5 download attribute
+                var url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+    }
       // initialize file and load content to dom
       function ReadFile(){
         // if load file fail, quit
@@ -50,35 +88,60 @@
             document.getElementById("readResult").innerHTML=contents;
             // select paths for build path tree
             var tds = document.getElementsByTagName("td");
-            // console.log(tds)
             for(var i=0;i<tds.length;i++){
               // path information
               var pathLine = tds[i].childNodes[0].data;
               // 25 is counted from pathLine.split() result
               var path = pathLine.split(" ")[25].split("/");
-              path.forEach(function(p,i){
-                if(pathCollection[i] === undefined){
-                  pathCollection.push([]);
+              path.forEach(function(p,j){
+                if(j == 0){
+                  dataCollection[j].push(" ")
                 }
-                if(pathCollection[i].indexOf(p) == -1){
-                  pathCollection[i].push(p);
+                else{
+                  if(dataCollection[j] === undefined){
+                    dataCollection.push([]);
+                    for(var k = 0;k<i;k++){
+                      dataCollection[j].push(" ")
+                    }
+                  }
+                  if(j==path.length-1 && j<dataCollection.length-1){
+                    for(var m = j+1;m<dataCollection.length;m++){
+                      dataCollection[m].push(" ")
+                    }
+                  }
+                  dataCollection[j].push(p);
                 }
               })
+            }
+            for(var i =dataCollection[dataCollection.length-1].length;i<dataCollection[dataCollection.length-2].length;i++){
+              dataCollection[dataCollection.length-1].push("")
+            }
+            dataCollection.push([])
+            dataCollection.push([])
+            for(var i=0;i<tds.length;i++){
               // code information
               var code = tds[i].childNodes[1].innerText;
-              if(codeFileCollection[pathLine.split(" ")[25]] === undefined){
-                codeFileCollection[pathLine.split(" ")[25]] = [];
-              }
-              // get class information by dom operation
               var cloneclass = tds[i].parentNode.parentNode.parentNode.previousElementSibling.innerText.split(" ")[2];
               // remove last comma
               var cloneClassNumber = cloneclass.substring(0,cloneclass.length-1);
-              codeFileCollection[pathLine.split(" ")[25]].push([cloneClassNumber,code]);
+              dataCollection[dataCollection.length-1].push(code)
+              dataCollection[dataCollection.length-2].push(cloneClassNumber)
             }
+            exportToCsv("data.csv",dataCollection)
         };
         reader.readAsText(NicadReport);
-        // console.log(pathCollection);
-        // console.log(codeFileCollection)
+        console.log(dataCollection);
+        let csvContent = "data:text/csv;charset=utf-8,";
+        dataCollection.forEach(function(rowArray){
+          console.log(rowArray)
+          let row = rowArray.join(",");
+          console.log(row)
+          csvContent += row + "\r\n";
+        }); 
+        console.log(csvContent)
+        //var encodedUri = encodeURI(csvContent);
+        //window.open(encodedUri);
+        // exportToCsv("data.csv",dataCollection)
       }
     </script>
     <div>
