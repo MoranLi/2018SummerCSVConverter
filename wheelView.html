@@ -1,6 +1,6 @@
 <html>
   <head>
-    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <script src="https://d3js.org/d3.v3.js"></script>
   </head>
   <body>
     <script>
@@ -14,32 +14,35 @@
                 name: "sad.java",
                 children: [
                   {
-                    class: 1,
-                    version: 1,
-                    next: {
-                      class: 4,
-                      version: 2,
-                      next: {
-                        class: 8,
-                        version: 3
+                    name: 1,
+                    children: [
+                      {
+                        name: 4,
+                        children: [
+                          {
+                            name: 8
+                          }
+                        ]
                       }
-                    }
+                    ]
                   },
                   {
-                    class: 2,
-                    version: 1,
-                    next: {
-                      class: 3,
-                      version: 2,
-                      next: {
-                        class: 5,
-                        version: 3,
-                        next: {
-                          class: 12,
-                          version: 4
-                        }
+                    name: 2,
+                    children: [
+                      {
+                        name: 3,
+                        children: [
+                          {
+                            name: 5,
+                            children: [
+                              {
+                                name: 12
+                              }
+                            ]
+                          }
+                        ]
                       }
-                    }
+                    ]
                   }
                 ]
               },
@@ -50,36 +53,40 @@
                     name: "tree.java",
                     children: [
                       {
-                        class: 2,
-                        version: 1,
-                        next: {
-                          class: 3,
-                          version: 2,
-                          next: {
-                            class: 5,
-                            version: 3,
-                            next: {
-                              class: 12,
-                              version: 4
-                            }
+                        name: 2,
+                        children: [
+                          {
+                            name: 3,
+                            children: [
+                              {
+                                name: 5,
+                                children: [
+                                  {
+                                    name: 12
+                                  }
+                                ]
+                              }
+                            ]
                           }
-                        }
+                        ]
                       },
                       {
-                        class: 6,
-                        version: 1,
-                        next: {
-                          class: 7,
-                          version: 2,
-                          next: {
-                            class: 9,
-                            version: 3,
-                            next: {
-                              class: 10,
-                              version: 4
-                            }
+                        name: 6,
+                        children: [
+                          {
+                            name: 7,
+                            children: [
+                              {
+                                name: 9,
+                                children: [
+                                  {
+                                    name: 10
+                                  }
+                                ]
+                              }
+                            ]
                           }
-                        }
+                        ]
                       }
                     ]
                   },
@@ -87,41 +94,67 @@
                     name: "friends.java",
                     children: [
                       {
-                        class: 1,
-                        version: 1,
-                        next: {
-                          class: 4,
-                          version: 2,
-                          next: {
-                            class: 8,
-                            version: 3
+                        name: 1,
+                        children: [
+                          {
+                            name: 4,
+                            children: [
+                              {
+                                name: 8
+                              }
+                            ]
                           }
-                        }
+                        ]
                       },
                       {
-                        class: 6,
-                        version: 1,
-                        next: {
-                          class: 7,
-                          version: 2,
-                          next: {
-                            class: 9,
-                            version: 3,
-                            next: {
-                              class: 10,
-                              version: 4
-                            }
+                        name: 6,
+                        children: [
+                          {
+                            name: 7,
+                            children: [
+                              {
+                                name: 9,
+                                children: [
+                                  {
+                                    name: 10
+                                  }
+                                ]
+                              }
+                            ]
                           }
-                        }
+                        ]
                       },
                       {
-                        class: 13,
-                        version: 3
+                        name: "",
+                        children: [
+                          {
+                            name: "",
+                            children: [
+                              {
+                                name: 13
+                              }
+                            ]
+                          }
+                        ]
                       },
                       {
-                        class: 14,
-                        version: 4
-                      }
+                        name: "",
+                        children: [
+                          {
+                            name: "",
+                            children: [
+                              {
+                                name: "",
+                                children: [
+                                  {
+                                    name: 14
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
                     ]
                   }
                 ]
@@ -136,54 +169,45 @@
                     name: "freeze.java",
                     children: [
                       {
-                        class: 1,
-                        version: 1,
-                        next: {
-                          class: 4,
-                          version: 2
-                        }
+                        name: 1,
+                        children: [
+                          {
+                            name: 4
+                          }
+                        ]
                       },
                       {
-                        class: 6,
-                        version: 1,
-                        next: {
-                          class: 7,
-                          version: 2
-                        }
+                        name: 6,
+                        children: [
+                          {
+                            name: 7
+                          }
+                        ]
                       },
                       {
-                        class: 13,
-                        version: 3,
-                        next: {
-                          class: 15,
-                          version: 4
-                        }
-                      }
+                        name: "",
+                        children: [
+                          {
+                            name: "",
+                            children: [
+                              {
+                                name: 13,
+                                children: [
+                                  {
+                                    name: 15
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
                     ]
                   }
                 ]
               }
             ]
           }
-          /*,
-          {
-            name: "src",
-            children: [
-              {
-                name: "whocare.java",
-                children: [
-
-                ]
-              },
-              {
-                name: "hard.java"
-              }
-            ]
-          },
-          {
-            name: "good.java",
-          }
-          */
         ]
       }
       console.log(fileTree);
@@ -211,9 +235,41 @@
             .outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });
       
       var nodes = partition.nodes(fileTree);
-	    var links = partition.links(fileTree);
+	    var links = partition.links(nodes);
 
 	    console.log(nodes);
+
+      var arcs = svg.selectAll("g")
+				  .data(nodes)
+				  .enter().append("g");
+	
+      arcs.append("path")
+        .attr("display", function(d) { return d.depth ? null : "none"; }) // hide inner ring
+        .attr("d", arc)
+        .style("stroke", "#fff")
+        .style("fill", function(d) { return color(d.name); })
+        .on("mouseover",function(d){
+          d3.select(this)
+            .style("fill","yellow")
+            .append("title").text(d.name)
+        })
+        .on("mouseout",function(d){
+          d3.select(this)
+            .transition()
+            .duration(200)
+            .style("fill", function(d) { 
+              return color(d.name); 
+            });
+        });
+              
+      arcs.append("text")  
+        .style("font-size", "12px")
+        .style("font-family", "simsun")
+        .attr("text-anchor","middle")
+        .attr("transform",function(d,i){
+              return "translate(" + arc.centroid(d) + ")";
+        }) 
+        .text(function(d) { return d.name; }); 	
 
     </script>
   </body>
