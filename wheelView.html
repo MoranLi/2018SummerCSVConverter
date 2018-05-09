@@ -1,0 +1,220 @@
+<html>
+  <head>
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+  </head>
+  <body>
+    <script>
+      var fileTree = {
+        name: "",
+        children: [
+          {
+            name: "user",
+            children: [
+              {
+                name: "sad.java",
+                children: [
+                  {
+                    class: 1,
+                    version: 1,
+                    next: {
+                      class: 4,
+                      version: 2,
+                      next: {
+                        class: 8,
+                        version: 3
+                      }
+                    }
+                  },
+                  {
+                    class: 2,
+                    version: 1,
+                    next: {
+                      class: 3,
+                      version: 2,
+                      next: {
+                        class: 5,
+                        version: 3,
+                        next: {
+                          class: 12,
+                          version: 4
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                name: "happy",
+                children: [
+                  {
+                    name: "tree.java",
+                    children: [
+                      {
+                        class: 2,
+                        version: 1,
+                        next: {
+                          class: 3,
+                          version: 2,
+                          next: {
+                            class: 5,
+                            version: 3,
+                            next: {
+                              class: 12,
+                              version: 4
+                            }
+                          }
+                        }
+                      },
+                      {
+                        class: 6,
+                        version: 1,
+                        next: {
+                          class: 7,
+                          version: 2,
+                          next: {
+                            class: 9,
+                            version: 3,
+                            next: {
+                              class: 10,
+                              version: 4
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    name: "friends.java",
+                    children: [
+                      {
+                        class: 1,
+                        version: 1,
+                        next: {
+                          class: 4,
+                          version: 2,
+                          next: {
+                            class: 8,
+                            version: 3
+                          }
+                        }
+                      },
+                      {
+                        class: 6,
+                        version: 1,
+                        next: {
+                          class: 7,
+                          version: 2,
+                          next: {
+                            class: 9,
+                            version: 3,
+                            next: {
+                              class: 10,
+                              version: 4
+                            }
+                          }
+                        }
+                      },
+                      {
+                        class: 13,
+                        version: 3
+                      },
+                      {
+                        class: 14,
+                        version: 4
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                name: "bad.java"
+              },
+              {
+                name: "cold",
+                children: [
+                  {
+                    name: "freeze.java",
+                    children: [
+                      {
+                        class: 1,
+                        version: 1,
+                        next: {
+                          class: 4,
+                          version: 2
+                        }
+                      },
+                      {
+                        class: 6,
+                        version: 1,
+                        next: {
+                          class: 7,
+                          version: 2
+                        }
+                      },
+                      {
+                        class: 13,
+                        version: 3,
+                        next: {
+                          class: 15,
+                          version: 4
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+          /*,
+          {
+            name: "src",
+            children: [
+              {
+                name: "whocare.java",
+                children: [
+
+                ]
+              },
+              {
+                name: "hard.java"
+              }
+            ]
+          },
+          {
+            name: "good.java",
+          }
+          */
+        ]
+      }
+      console.log(fileTree);
+
+      var width = 450,
+          height = 450,
+          radius =  Math.min(width, height) / 2 ,
+          color = d3.scale.category20();
+        
+      var svg = d3.select("body").append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .append("g")
+            .attr("transform", "translate(" + radius + "," + radius + ")");
+
+      var partition = d3.layout.partition()
+              .sort(null)
+              .size([2 * Math.PI, radius * radius])
+              .value(function(d) { return 1; });
+              
+      var arc = d3.svg.arc()
+            .startAngle(function(d) { return d.x; })
+            .endAngle(function(d) { return d.x + d.dx; })
+            .innerRadius(function(d) { return Math.sqrt(d.y); })
+            .outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });
+      
+      var nodes = partition.nodes(fileTree);
+	    var links = partition.links(fileTree);
+
+	    console.log(nodes);
+
+    </script>
+  </body>
+</html>
