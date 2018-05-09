@@ -1,0 +1,122 @@
+<html>
+  <head>
+
+  </head>
+  <body>
+    <script>
+      // variable store user`s input file object
+      var NicadReport;
+      var GcadReport;
+      // variable to store path information
+      var dataCollection = {};
+      // initialize file object with check file type of file user uploaded
+      function initializeFile(){
+        NicadReport = document.getElementById("NicadFile").files[0];
+        GcadReport = document.getElementById("GcadFile").files[0];
+        // check file is selected
+        if(NicadReport == undefined || GcadReport == undefined){
+          alert("file is not submitted !");
+          return false;
+        }
+        // check uploaded file type
+        if(NicadReport.type !== "text/html" || GcadReport.type !== "text/plain"){
+          alert("illegal File type");
+          return false;
+        }
+        return true;
+      }
+      // initialize file and load content to dom
+      function ReadFile(){
+        // if load file fail, quit
+        if(!initializeFile()){
+          return;
+        }
+        // read NicadReport
+        // FileReader usage example: https://stackoverflow.com/questions/12371970/read-text-file-using-filereader
+        var reader = new FileReader();
+        reader.onload = function(event)
+        {
+            var contents = event.target.result;
+            var lines = contents.split('\n');
+            // add content to div for dom usage
+            document.getElementById("readResult").innerHTML=contents;
+            // select paths for build path tree
+            var tds = document.getElementsByTagName("td");
+            // first loop, get file path information
+            for(var i=0;i<tds.length;i++){
+              // path information
+              var pathLine = tds[i].childNodes[0].data;
+              // 25 is counted from pathLine.split() result
+              var path = pathLine.split(" ")[25].split("/");
+              path.forEach(function(p,j){
+                // make first row to empty space represent root dictonary
+                if(j == 0){
+                  dataCollection[j].push(" ")
+                }
+                else{
+                  // if new row(deeper level of file tree) is created
+                  if(dataCollection[j] === undefined){
+                    dataCollection.push([]);
+                    // fill previous space with space represent no more deeper level file
+                    for(var k = 0;k<i;k++){
+                      dataCollection[j].push(" ")
+                    }
+                  }
+                  // if there exist a deep level is revisit after several higher level file
+                  // fill space to meantion level before is already end
+                  if(j==path.length-1 && j<dataCollection.length-1){
+                    for(var m = j+1;m<dataCollection.length;m++){
+                      dataCollection[m].push(" ")
+                    }
+                  }
+                  dataCollection[j].push(p);
+                }
+              })
+            }
+            // fill the last column with empty space, meaning the last-1 row is the file node and nothing below
+            for(var i =dataCollection[dataCollection.length-1].length;i<dataCollection[dataCollection.length-2].length;i++){
+              dataCollection[dataCollection.length-1].push("")
+            }
+            // add empty array for store clone class & clone code
+            dataCollection.push([])
+            dataCollection.push([])
+            for(var i=0;i<tds.length;i++){
+              // code information
+              var code = tds[i].childNodes[1].innerText;
+              // td <- tr <- tbody <- table == h3
+              // <- means left is child of right, == means left and right is sibling
+              // h3 contain clone class number and information
+              var cloneclass = tds[i].parentNode.parentNode.parentNode.previousElementSibling.innerText.split(" ")[2];
+              // remove last comma
+              var cloneClassNumber = cloneclass.substring(0,cloneclass.length-1);
+              // store data to collection
+              dataCollection[dataCollection.length-1].push(code)
+              dataCollection[dataCollection.length-2].push(cloneClassNumber)
+            }
+            // generate fake data for implementation of wheel view
+            // assume have 20 version
+            
+        };
+        reader.readAsText(NicadReport);
+        console.log(dataCollection);
+        /*
+        // export to csv file, v2
+        let csvContent = "data:text/csv;charset=utf-8,";
+        dataCollection.forEach(function(rowArray){
+          let row = rowArray.join(",");
+          csvContent += row + "\r\n";
+        }); 
+        var encodedUri = encodeURI(csvContent);
+        window.open(encodedUri);
+        */
+      }
+    </script>
+    <div>
+      <label>Submit Nicad Clone Report</label><input id="NicadFile" name="cloneReport" type="file" accept=".html">
+      <label>Submit Gcad Report</label><input id="GcadFile" name="cloneReport" type="file" accept=".txt">
+      <button onclick="ReadFile()">Submit</button> 
+    </div>
+    <div id="readResult"></div>
+    <div id="pathResult"></div>
+  </body>
+</html>
