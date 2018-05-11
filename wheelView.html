@@ -1,6 +1,8 @@
 <html>
   <head>
     <script src="https://d3js.org/d3.v3.js"></script>
+    <!-- hsl color library -->
+    <script src="https://d3js.org/d3-color.v1.min.js"></script>
   </head>
   <body>
     <script>
@@ -210,12 +212,59 @@
           }
         ]
       }
-      console.log(fileTree);
+
+      // evolution of each clone class, currently fake data
+      var evolution_chain = [[1,4,8],[2,3,5,12],[6,7,9,10],[13,15],[14]];
+
+      // color generateed for each clone class
+      // base on which evolution chain it on and it position
+      var color_evolution_chain = [[]];
+
+      // scale each clone evolution chain to give a h value for each chain
+      // 360 is the max H value for hsl color
+      var chain_scale = d3.scale.linear().domain([0,evolution_chain.length]).range([0,360]);
+      for(var i=0;i<evolution_chain.length;i++){
+        var h_value = chain_scale(i);
+        for(var j=0;j<evolution_chain[i].length;j++){
+          // s-value start from 0.25 because hsl is different from hsv
+          // for s = 0, it will be same color no matter value of h
+          // s need to start with some value to differenificate first level of each chain
+          var clone_scale = d3.scale.linear().domain([0,evolution_chain[i].length]).range([0.25,1]);
+          var s_value = clone_scale(j);
+          if(color_evolution_chain[i] == undefined){
+            color_evolution_chain.push([]);
+          }
+          console.log("h is "+h_value+", s is "+s_value);
+          color_evolution_chain[i].push(d3.hsl(h_value,s_value,0.5).hex());
+        }
+      }
+
+      // find represent color on color_evolution_chain base on index
+      var find_in_chain = function(name){
+        if(Number.isInteger(name)){
+          for(var i=0;i<evolution_chain.length;i++){
+            for(var j=0;j<evolution_chain[i].length;j++){
+              if(evolution_chain[i][j] == name){
+                var selected = color_evolution_chain[i][j];
+                return selected;
+              }
+            }
+          }
+        }
+        // default color for file and directory level
+        else{
+          return "#e1dcd9";
+        }
+      }
+      
+      // console.log(fileTree);
+      // console.log(evolution_chain)
+      // console.log(color_evolution_chain)
 
       var width = 450,
           height = 450,
           radius =  Math.min(width, height) / 2 ,
-          color = d3.scale.category20();
+          color_name = d3.scale.category10();
         
       var svg = d3.select("body").append("svg")
             .attr("width", width)
@@ -237,8 +286,6 @@
       var nodes = partition.nodes(fileTree);
 	    var links = partition.links(nodes);
 
-	    console.log(nodes);
-
       var arcs = svg.selectAll("g")
 				  .data(nodes)
 				  .enter().append("g");
@@ -247,7 +294,9 @@
         .attr("display", function(d) { return d.depth ? null : "none"; }) // hide inner ring
         .attr("d", arc)
         .style("stroke", "#fff")
-        .style("fill", function(d) { return color(d.name); })
+        .style("fill", function(d) { 
+          return find_in_chain(d.name)
+         })
         .on("mouseover",function(d){
           d3.select(this)
             .style("fill","yellow")
@@ -258,7 +307,7 @@
             .transition()
             .duration(200)
             .style("fill", function(d) { 
-              return color(d.name); 
+              return find_in_chain(d.name)
             });
         });
               
