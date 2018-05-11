@@ -6,208 +6,190 @@
   </head>
   <body>
     <script>
+      var sad_java_clone_one = { 
+        name: 1, 
+        children: [ { 
+          name: 4, 
+          children: [
+            { name: 8 }
+          ]
+        } ]
+      }
+      var sad_java_clone_two = { 
+        name: 2, 
+        children: [ { 
+          name: 3, 
+          children: [  { 
+            name: 5, 
+            children: [
+              {  name: 12 }
+            ]
+          } ]
+        } ]
+      }
+      var sad_java = {
+                name: "sad.java",
+                children: [
+                  sad_java_clone_one,
+                  sad_java_clone_two
+                ]
+              }
+      
+      var tree_java_clone_one = {
+        name: 2,
+        children: [ {
+            name: 3,
+            children: [ {
+                name: 5,
+                children: [
+                  { name: 12 }
+                ]
+              } ]
+          } ]
+      }
+      var tree_java_clone_two = {
+        name: 6,
+        children: [ {
+            name: 7,
+            children: [ {
+                name: 9,
+                children: [
+                  { name: 10 }
+                ]
+              } ]
+          } ]
+      }
+      var tree_java = {
+        name: "tree.java",
+        children: [
+          tree_java_clone_one,
+          tree_java_clone_two
+        ]
+      }
+
+      var friends_java_clone_one = {
+        name: 1,
+        children: [ {
+            name: 4,
+            children: [ {
+                name: 8
+              } ]
+          } ]
+      }
+      var friends_java_clone_two = {
+        name: 6,
+        children: [ {
+            name: 7,
+            children: [ {
+                name: 9,
+                children: [
+                  { name: 10 }
+                ]
+              } ]
+          } ]
+      }   
+      var friends_java_clone_three = {
+        name: "",
+        children: [ {
+            name: "",
+            children: [ {
+                name: 13
+              } ]
+          } ]
+      }
+      var friends_java_clone_four = {
+        name: "",
+        children: [ {
+            name: "",
+            children: [ {
+                name: "",
+                children: [
+                  { name: 14 }
+                ]
+              } ]
+          } ]
+      }
+      var friends_java = {
+        name: "friends.java",
+        children: [
+          friends_java_clone_one,
+          friends_java_clone_two,
+          friends_java_clone_three,
+          friends_java_clone_four
+        ]
+      }
+      var happy =  { name: "happy",
+                children: [
+                  tree_java,
+                  friends_java
+                ]
+              }
+      
+      
+      var freeze_java_clone_one = {
+        name: 1,
+        children: [ {
+            name: 4
+          } ]
+      }
+      var freeze_java_clone_two = {
+        name: 6,
+        children: [ {
+            name: 7
+          } ]
+      }
+      var freeze_java_clone_three = {
+        name: "",
+        children: [ {
+            name: "",
+            children: [ {
+                name: 13,
+                children: [
+                  { name: 15 }
+                ]
+              } ]
+          } ]
+      }
+      var freeze_java_clone_four = {
+        name: "",
+        children: [ {
+            name: "",
+            children: [ {
+                name: "",
+                children: [
+                  { name: 14 }
+                ]
+              } ]
+          } ]
+      }
+      var freeze_java = {
+        name: "freeze.java",
+        children: [
+          freeze_java_clone_one,
+          freeze_java_clone_two,
+          freeze_java_clone_three,
+          freeze_java_clone_four
+        ]
+      }
+
+      var cold =  { name: "cold",
+                children: [
+                  freeze_java
+                ]
+              }
+  
       var fileTree = {
         name: "",
         children: [
           {
             name: "user",
             children: [
-              {
-                name: "sad.java",
-                children: [
-                  {
-                    name: 1,
-                    children: [
-                      {
-                        name: 4,
-                        children: [
-                          {
-                            name: 8
-                          }
-                        ]
-                      }
-                    ]
-                  },
-                  {
-                    name: 2,
-                    children: [
-                      {
-                        name: 3,
-                        children: [
-                          {
-                            name: 5,
-                            children: [
-                              {
-                                name: 12
-                              }
-                            ]
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                name: "happy",
-                children: [
-                  {
-                    name: "tree.java",
-                    children: [
-                      {
-                        name: 2,
-                        children: [
-                          {
-                            name: 3,
-                            children: [
-                              {
-                                name: 5,
-                                children: [
-                                  {
-                                    name: 12
-                                  }
-                                ]
-                              }
-                            ]
-                          }
-                        ]
-                      },
-                      {
-                        name: 6,
-                        children: [
-                          {
-                            name: 7,
-                            children: [
-                              {
-                                name: 9,
-                                children: [
-                                  {
-                                    name: 10
-                                  }
-                                ]
-                              }
-                            ]
-                          }
-                        ]
-                      }
-                    ]
-                  },
-                  {
-                    name: "friends.java",
-                    children: [
-                      {
-                        name: 1,
-                        children: [
-                          {
-                            name: 4,
-                            children: [
-                              {
-                                name: 8
-                              }
-                            ]
-                          }
-                        ]
-                      },
-                      {
-                        name: 6,
-                        children: [
-                          {
-                            name: 7,
-                            children: [
-                              {
-                                name: 9,
-                                children: [
-                                  {
-                                    name: 10
-                                  }
-                                ]
-                              }
-                            ]
-                          }
-                        ]
-                      },
-                      {
-                        name: "",
-                        children: [
-                          {
-                            name: "",
-                            children: [
-                              {
-                                name: 13
-                              }
-                            ]
-                          }
-                        ]
-                      },
-                      {
-                        name: "",
-                        children: [
-                          {
-                            name: "",
-                            children: [
-                              {
-                                name: "",
-                                children: [
-                                  {
-                                    name: 14
-                                  }
-                                ]
-                              }
-                            ]
-                          }
-                        ]
-                      },
-                    ]
-                  }
-                ]
-              },
+              sad_java,
+              happy,
               {
                 name: "bad.java"
               },
-              {
-                name: "cold",
-                children: [
-                  {
-                    name: "freeze.java",
-                    children: [
-                      {
-                        name: 1,
-                        children: [
-                          {
-                            name: 4
-                          }
-                        ]
-                      },
-                      {
-                        name: 6,
-                        children: [
-                          {
-                            name: 7
-                          }
-                        ]
-                      },
-                      {
-                        name: "",
-                        children: [
-                          {
-                            name: "",
-                            children: [
-                              {
-                                name: 13,
-                                children: [
-                                  {
-                                    name: 15
-                                  }
-                                ]
-                              }
-                            ]
-                          }
-                        ]
-                      },
-                    ]
-                  }
-                ]
-              }
+              cold
             ]
           }
         ]
@@ -251,13 +233,17 @@
             }
           }
         }
+        // default color for empty(no clone instance) verion
+        else if (name == ""){
+          return "#e3e7ed"
+        }
         // default color for file and directory level
         else{
-          return "#e1dcd9";
+          return "#a3a8af";
         }
       }
       
-      // console.log(fileTree);
+       console.log(fileTree);
       // console.log(evolution_chain)
       // console.log(color_evolution_chain)
 
@@ -291,7 +277,7 @@
 				  .enter().append("g");
 	
       arcs.append("path")
-        .attr("display", function(d) { return d.depth ? null : "none"; }) // hide inner ring
+        .attr("display", function(d) { return d.depth ? null : "none"; }) 
         .attr("d", arc)
         .style("stroke", "#fff")
         .style("fill", function(d) { 
