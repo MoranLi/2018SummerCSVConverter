@@ -1,0 +1,126 @@
+<html>
+  <head>
+    <script src="https://d3js.org/d3.v3.js"></script>
+    <!-- hsl color library -->
+    <script src="https://d3js.org/d3-color.v1.min.js"></script>
+  </head>
+  <body>
+    <script>
+      
+      // color generateed for each clone class
+      // base on which evolution chain it on and it position
+      var color_evolution_chain = [[]];
+
+      // fill data into color_evolution_chain
+      var generate_color = function (evolution_chain) {
+        // scale each clone evolution chain to give a h value for each chain
+        // 360 is the max H value for hsl color
+        var chain_scale = d3.scale.linear().domain([0,evolution_chain.length]).range([0,360]);
+        for(var i=0;i<evolution_chain.length;i++){
+          var h_value = chain_scale(i);
+          for(var j=0;j<evolution_chain[i].length;j++){
+            // s-value start from 0.25 because hsl is different from hsv
+            // for s = 0, it will be same color no matter value of h
+            // s need to start with some value to differenificate first level of each chain
+            var clone_scale = d3.scale.linear().domain([0,evolution_chain[i].length]).range([0.25,1]);
+            var s_value = clone_scale(j);
+            if(color_evolution_chain[i] == undefined){
+              color_evolution_chain.push([]);
+            }
+            color_evolution_chain[i].push(d3.hsl(h_value,s_value,0.5).hex());
+          }
+        }
+      }
+
+      // find represent color on color_evolution_chain base on index
+      var find_in_chain = function(name,evolution_chain){
+        if(Number.isInteger(name)){
+          for(var i=0;i<evolution_chain.length;i++){
+            for(var j=0;j<evolution_chain[i].length;j++){
+              if(evolution_chain[i][j] == name){
+                var selected = color_evolution_chain[i][j];
+                return selected;
+              }
+            }
+          }
+        }
+        // default color for empty(no clone instance) verion
+        else if (name == ""){
+          return "#e3e7ed"
+        }
+        // default color for file and directory level
+        else{
+          return "#a3a8af";
+        }
+      }
+
+      var width = 450,
+          height = 450,
+          radius =  Math.min(width, height) / 2 ,
+          color_name = d3.scale.category10();
+        
+      var svg = d3.select("body").append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .append("g")
+            .attr("transform", "translate(" + radius + "," + radius + ")");
+
+      var partition = d3.layout.partition()
+              .sort(null)
+              .size([2 * Math.PI, radius * radius])
+              .value(function(d) { return 1; });
+              
+      var arc = d3.svg.arc()
+            .startAngle(function(d) { return d.x; })
+            .endAngle(function(d) { return d.x + d.dx; })
+            .innerRadius(function(d) { return Math.sqrt(d.y); })
+            .outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });
+
+      d3.json("data.json",function(error,root){
+        if(error){
+          console.log(error)
+          return;
+        }
+        generate_color(root.evolution);
+        var nodes = partition.nodes(root.data);
+        var links = partition.links(nodes);
+
+        var arcs = svg.selectAll("g")
+            .data(nodes)
+            .enter().append("g");
+    
+        arcs.append("path")
+          .attr("display", function(d) { return d.depth ? null : "none"; }) 
+          .attr("d", arc)
+          .style("stroke", "#fff")
+          .style("fill", function(d) { 
+            return find_in_chain(d.name,root.evolution)
+          })
+          .on("mouseover",function(d){
+            d3.select(this)
+              .style("fill","yellow")
+              .append("title").text(d.name)
+          })
+          .on("mouseout",function(d){
+            d3.select(this)
+              .transition()
+              .duration(200)
+              .style("fill", function(d) { 
+                return find_in_chain(d.name,root.evolution)
+              });
+          });
+                
+        arcs.append("text")  
+          .style("font-size", "12px")
+          .style("font-family", "simsun")
+          .attr("text-anchor","middle")
+          .attr("transform",function(d,i){
+                return "translate(" + arc.centroid(d) + ")";
+          }) 
+          .text(function(d) { return d.name; });
+      })
+ 	
+
+    </script>
+  </body>
+</html>
