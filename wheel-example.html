@@ -193,6 +193,9 @@
                         .attrTween("d", function(d) { return arcTween.call(this, exitArc(d)); })
                         .remove();
 
+                    var t0 = text.exit();
+                    console.log(t0)
+                    console.log(t0.remove())
                     // text.exit().remove();
                     // document.getElementsByTagName("text").innerText = ""
 
@@ -201,6 +204,13 @@
                         .style("fill", function(d) { return d.fill; })
                         .on("click", zoomIn)
                         .each(function(d) { this._current = enterArc(d); });
+                
+                    path.append("title")
+                        .text(function(d){return d.name});
+                
+                    path.transition()
+                        .style("fill-opacity", 1)
+                        .attrTween("d", function(d) { return arcTween.call(this, updateArc(d)); });
 
                     text.enter().append("text")
                         .style("font-size", "12px")
@@ -210,13 +220,6 @@
                             return "translate(" + arc.centroid(d) + ")";
                         }) 
                         .text(function(d) { return d.name; });
-                
-                    path.append("title")
-                        .text(function(d){return d.name});
-                
-                    path.transition()
-                        .style("fill-opacity", 1)
-                        .attrTween("d", function(d) { return arcTween.call(this, updateArc(d)); });
                 });
             }
         });

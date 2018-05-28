@@ -6,6 +6,7 @@
     <script src="https://d3js.org/d3-color.v1.min.js"></script>
   </head>
   <body>
+    <button onclick="reset_color()">reset</button>
     <script>
       
       /*
@@ -117,8 +118,13 @@
             return find_color(root.evolution,root.colorSet,d.name,d.chain_id)
           })
           .on("mouseover",function(d){
-            d3.select(this)
-              .style("fill","yellow")
+            d3.selectAll("path")
+              .style("fill",function(e){
+                if(e.chain_id == d.chain_id){
+                  return "yellow"
+                }
+                return find_color(root.evolution,root.colorSet,d.name,d.chain_id)
+              })
               .append("title").text(d.name)
           })
           .on("mouseout",function(d){
@@ -139,6 +145,14 @@
                 return "translate(" + arc.centroid(d) + ")";
           }) 
           .text(function(d) { return d.name; });
+
+        function reset_color(){
+          d3.selectAll("path")
+          .style("fill", function(d) { 
+            return find_color(root.evolution,root.colorSet,d.name,d.chain_id)
+          });
+        }
+
       })
  	
 
