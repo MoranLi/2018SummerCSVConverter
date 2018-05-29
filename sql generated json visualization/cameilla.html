@@ -41,17 +41,54 @@ d3.json("camellia.json", function(error, root) {
 		console.log(error);
 	console.log(root);
 
-	var nodes = partition.nodes(root);
+	root.children[0].children.sort(function(a, b) {
+		return b.children.length - a.children.length;
+	})
+
+	root.children[1].children.sort(function(a, b) {
+		return b.children.length - a.children.length;
+	})
+
+	root.children[2].children.sort(function(a, b) {
+		return b.children.length - a.children.length;
+	})
+
+	var temp_root = JSON.parse(JSON.stringify(root));;
+	var total = 20;
+	var total_file = root.children[0].children.length+root.children[1].children.length+root.children[2].children.length;
+
+	var type1FileNum = Math.round(total * root.children[0].children.length / total_file);
+	var type2FileNum = Math.round(total * root.children[1].children.length / total_file);
+	var type3FileNum = Math.round(total * root.children[2].children.length / total_file);
+
+	console.log(type1FileNum+", "+type2FileNum+", "+type3FileNum)
+
+	console.log(root.children[0].children)
+	console.log(root.children[1].children)
+	console.log(root.children[2].children)
+
+
+	temp_root.children[0].children = temp_root.children[0].children.slice(0,type1FileNum);
+	temp_root.children[1].children = temp_root.children[1].children.slice(0,type2FileNum);
+	temp_root.children[2].children = temp_root.children[2].children.slice(0,type3FileNum);
+
+	var nodes = partition.nodes(temp_root);
 	var links = partition.links(nodes);
 
 	console.log(nodes);
   
+	
   var arcs = svg.selectAll("g")
 				  .data(nodes)
 				  .enter().append("g");
 	
 	arcs.append("path")
-		.attr("display", function(d) { return d.depth ? null : "none"; }) // hide inner ring
+		.attr("display", function(d) { 
+				if(d.depth < 3){
+					return null;
+				}
+				return "none";
+			})
 		.attr("d", arc)
 		.style("stroke", "#fff")
 		.style("fill", function(d) { return color((d.children ? d : d.parent).name); })
@@ -67,8 +104,7 @@ d3.json("camellia.json", function(error, root) {
 					return color((d.children ? d : d.parent).name); 
 				});
 		});
-
-				  
+			  
 	arcs.append("text")  
 		.style("font-size", "12px")
 		.style("font-family", "simsun")
@@ -84,9 +120,14 @@ d3.json("camellia.json", function(error, root) {
 				return  "translate(" + arc.centroid(d) + ")" +
 						"rotate(" + r + ")";
 		}) 
-		.text(function(d) { return d.name; }); 	
+		.text(function(d) { 
+				if(d.depth<3){
+					return d.name; 
+				}
+			}); 	
 
-  
+			
+
 });
 
 </script>
