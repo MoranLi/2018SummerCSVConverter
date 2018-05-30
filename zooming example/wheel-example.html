@@ -61,6 +61,12 @@
             }
         }
     
+        function filter_min_arc_size_text(d, i) {return (d.dx*d.depth*radius/3)>14}; 
+
+        function computeTextRotation(d) {
+            var angle=(d.x +d.dx/2)*180/Math.PI - 90;	
+            return angle;
+        }
     
         var margin = {top: 350, right: 480, bottom: 350, left: 480},
             radius = Math.min(margin.top, margin.right, margin.bottom, margin.left) - 10;
@@ -87,8 +93,8 @@
             .endAngle(function(d) { return d.x + d.dx ; })
             .padAngle(.01)
             .padRadius(radius / 3)
-            .innerRadius(function(d) { return radius / 3 * d.depth / 2; })
-            .outerRadius(function(d) { return (radius / 3 * (d.depth + 1) - 1)/2; });
+            .innerRadius(function(d) { return radius / 3 * d.depth / 1.5; })
+            .outerRadius(function(d) { return (radius / 3 * (d.depth + 1) - 1) / 1.5; });
         
         d3.json("data2.json", function(error, root) {
             if (error) throw error;
@@ -129,8 +135,8 @@
             
             path.append("title")
                 .text(function(d){return d.name});
-            
-            var text = svg.selectAll("text")
+
+            var texts = svg.selectAll("text")
                 .data(partition.nodes(root.data).slice(1))
                 .enter().append("text")  
                 .style("font-size", "12px")
@@ -141,6 +147,7 @@
                 }) 
                 .text(function(d) { return d.name; });
 
+            
             function zoomIn(p) {
                 if (p.depth > 1) p = p.parent;
                 if (!p.children) return;
@@ -179,8 +186,6 @@
                 if (root === p) enterArc = outsideArc, exitArc = insideArc, outsideAngle.range([p.x, p.x + p.dx]);
             
                 path = path.data(partition.nodes(root).slice(1), function(d) { return d.key; });
-
-                text = text.data(partition.nodes(root).slice(1), function(d) { return d.key; });
             
                 // When zooming out, arcs enter from the inside and exit to the outside.
                 // Exiting outside arcs transition to the new layout.
@@ -192,12 +197,6 @@
                         .style("fill-opacity", function(d) { return d.depth === 1 + (root === p) ? 1 : 0; })
                         .attrTween("d", function(d) { return arcTween.call(this, exitArc(d)); })
                         .remove();
-
-                    var t0 = text.exit();
-                    console.log(t0)
-                    console.log(t0.remove())
-                    // text.exit().remove();
-                    // document.getElementsByTagName("text").innerText = ""
 
                     path.enter().append("path")
                         .style("fill-opacity", function(d) { return d.depth === 2 - (root === p) ? 1 : 0; })
@@ -212,14 +211,21 @@
                         .style("fill-opacity", 1)
                         .attrTween("d", function(d) { return arcTween.call(this, updateArc(d)); });
 
-                    text.enter().append("text")
-                        .style("font-size", "12px")
+                    texts = texts.data(partition.nodes(root).slice(1), function(d) { return d.key; })
+	 
+                    texts.exit()
+                            .remove()    
+                    texts.enter()
+                            .append("text")
+                        
+                    texts.style("font-size", "12px")
                         .style("font-family", "simsun")
                         .attr("text-anchor","middle")
                         .attr("transform",function(d,i){
                             return "translate(" + arc.centroid(d) + ")";
                         }) 
-                        .text(function(d) { return d.name; });
+                        .text(function(d) { return d.name; })
+                        .transition().delay(750).style("opacity", 1)
                 });
             }
         });
