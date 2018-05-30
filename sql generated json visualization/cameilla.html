@@ -1,136 +1,144 @@
 
 <html>
- <head>
-        <meta charset="utf-8">  
-        <title>Circle - Partition</title>  
-  </head> 
+	<head>
+  	<meta charset="utf-8">  
+		<title>Circle - Partition</title>
+		<link rel="stylesheet" type="text/css" href="lib/d3.slider.css">
+		<script src="http://d3js.org/d3.v3.min.js"></script>
+		<script src="lib/d3.slider.js"></script>  
+	</head> 
+	<body>
+		<div id="slider" style="position: relative; top:20px;"></div>
+		<script>
+			var num_ele = []
+			for( var i = 0;i<100;i++){
+				num_ele.push(i)
+			}
+			var slider = d3.slider().min(1).max(100)
+										.tickValues(num_ele).stepValues(num_ele).callback(null);
+			d3.select("#slider").call(slider);
 
-<style>
-
-</style>
-<body>
-<script src="http://d3js.org/d3.v3.min.js"></script>
-<script>
-
-var width = 2400,
-    height = 2400,
-    radius =  Math.min(width, height) / 2 ,
-    color = d3.scale.category20();
-	
-var svg = d3.select("body").append("svg")
-			.attr("width", width)
-			.attr("height", height)
-			.append("g")
-			.attr("transform", "translate(" + radius + "," + radius + ")");
-
-var partition = d3.layout.partition()
-				.sort(null)
-				.size([2 * Math.PI, radius * radius])
-				.value(function(d) { return 1; });
+			var width = 800,
+					height = 800,
+					radius =  Math.min(width, height) / 2 ,
+					color = d3.scale.category20(),
+					dataRoot;
 				
-var arc = d3.svg.arc()
-			.startAngle(function(d) { return d.x; })
-			.endAngle(function(d) { return d.x + d.dx; })
-			.innerRadius(function(d) { return Math.sqrt(d.y/10); })
-			.outerRadius(function(d) { return Math.sqrt(d.y/10 + d.dy/10); });
+			var svg = d3.select("body").append("svg")
+						.attr("width", width)
+						.attr("height", height)
+						.append("g")
+						.attr("transform", "translate(" + radius + "," + radius + ")");
+
+			var partition = d3.layout.partition()
+							.sort(null)
+							.size([2 * Math.PI, radius * radius])
+							.value(function(d) { return 1; });
+							
+			var arc = d3.svg.arc()
+						.startAngle(function(d) { return d.x; })
+						.endAngle(function(d) { return d.x + d.dx; })
+						.innerRadius(function(d) { return Math.sqrt(d.y); })
+						.outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });
 
 
-d3.json("camellia.json", function(error, root) {
+			d3.json("camellia.json", function(error, root) {
 
-	if(error)
-		console.log(error);
-	console.log(root);
-
-	root.children[0].children.sort(function(a, b) {
-		return b.children.length - a.children.length;
-	})
-
-	root.children[1].children.sort(function(a, b) {
-		return b.children.length - a.children.length;
-	})
-
-	root.children[2].children.sort(function(a, b) {
-		return b.children.length - a.children.length;
-	})
-
-	var temp_root = JSON.parse(JSON.stringify(root));;
-	var total = 20;
-	var total_file = root.children[0].children.length+root.children[1].children.length+root.children[2].children.length;
-
-	var type1FileNum = Math.round(total * root.children[0].children.length / total_file);
-	var type2FileNum = Math.round(total * root.children[1].children.length / total_file);
-	var type3FileNum = Math.round(total * root.children[2].children.length / total_file);
-
-	console.log(type1FileNum+", "+type2FileNum+", "+type3FileNum)
-
-	console.log(root.children[0].children)
-	console.log(root.children[1].children)
-	console.log(root.children[2].children)
+				if(error)
+					console.log(error);
+				console.log(root);
 
 
-	temp_root.children[0].children = temp_root.children[0].children.slice(0,type1FileNum);
-	temp_root.children[1].children = temp_root.children[1].children.slice(0,type2FileNum);
-	temp_root.children[2].children = temp_root.children[2].children.slice(0,type3FileNum);
+				// sorting files in type1/type2/type3 clone by number of clone chain
+				root.children[0].children.sort(function(a, b) {
+					return b.children.length - a.children.length;
+				})
 
-	var nodes = partition.nodes(temp_root);
-	var links = partition.links(nodes);
+				root.children[1].children.sort(function(a, b) {
+					return b.children.length - a.children.length;
+				})
 
-	console.log(nodes);
-  
-	
-  var arcs = svg.selectAll("g")
-				  .data(nodes)
-				  .enter().append("g");
-	
-	arcs.append("path")
-		.attr("display", function(d) { 
-				if(d.depth < 3){
-					return null;
-				}
-				return "none";
-			})
-		.attr("d", arc)
-		.style("stroke", "#fff")
-		.style("fill", function(d) { return color((d.children ? d : d.parent).name); })
-		.on("mouseover",function(d){
-			d3.select(this)
-				.style("fill","yellow");
-		})
-		.on("mouseout",function(d){
-			d3.select(this)
-				.transition()
-				.duration(200)
-				.style("fill", function(d) { 
-					return color((d.children ? d : d.parent).name); 
-				});
-		});
-			  
-	arcs.append("text")  
-		.style("font-size", "12px")
-		.style("font-family", "simsun")
-		.attr("text-anchor","middle")
-		.attr("transform",function(d,i){
-				if( i == 0 )
-					return "translate(" + arc.centroid(d) + ")";
-				var r = 0;
-				if( (d.x+d.dx/2)/Math.PI*180 < 180 )  
-					r = 180 * ((d.x + d.dx / 2 - Math.PI / 2) / Math.PI);
-				else 
-					r = 180 * ((d.x + d.dx / 2 + Math.PI / 2) / Math.PI);
-				return  "translate(" + arc.centroid(d) + ")" +
-						"rotate(" + r + ")";
-		}) 
-		.text(function(d) { 
-				if(d.depth<3){
-					return d.name; 
-				}
-			}); 	
+				root.children[2].children.sort(function(a, b) {
+					return b.children.length - a.children.length;
+				})
 
-			
+				var temp_root = JSON.parse(JSON.stringify(root));
+				// total number of file display
+				var total = 20;
+				// total number of files from sources
+				var total_file = root.children[0].children.length+root.children[1].children.length+root.children[2].children.length;
 
-});
+				// specific number of file been displayed for each type
+				var type1FileNum = Math.round(total * root.children[0].children.length / total_file);
+				var type2FileNum = Math.round(total * root.children[1].children.length / total_file);
+				var type3FileNum = Math.round(total * root.children[2].children.length / total_file);
 
-</script>
-		
-    </body>  
+				console.log(type1FileNum+", "+type2FileNum+", "+type3FileNum)
+
+				console.log(root.children[0].children)
+				console.log(root.children[1].children)
+				console.log(root.children[2].children)
+
+				// slice first n element to keep original proportion
+				temp_root.children[0].children = temp_root.children[0].children.slice(0,type1FileNum);
+				temp_root.children[1].children = temp_root.children[1].children.slice(0,type2FileNum);
+				temp_root.children[2].children = temp_root.children[2].children.slice(0,type3FileNum);
+
+				var nodes = partition.nodes(temp_root);
+				var links = partition.links(nodes);
+
+				console.log(nodes);
+								
+				var arcs = svg.selectAll("g")
+								.data(nodes)
+								.enter().append("g");
+				
+				var path = arcs.append("path")
+					.attr("display", function(d) { 
+							if(d.depth < 3){
+								return null;
+							}
+							return "none";
+						})
+					.attr("d", arc)
+					.style("stroke", "#fff")
+					.style("fill", function(d) { return color((d.children ? d : d.parent).name); })
+					.on("mouseover",function(d){
+						d3.select(this)
+							.style("fill","yellow");
+					})
+					.on("mouseout",function(d){
+						d3.select(this)
+							.transition()
+							.duration(200)
+							.style("fill", function(d) { 
+								return color((d.children ? d : d.parent).name); 
+							});
+					});
+				
+				console.log(path)
+
+				var text = arcs.append("text")  
+					.style("font-size", "12px")
+					.style("font-family", "simsun")
+					.attr("text-anchor","middle")
+					.attr("transform",function(d,i){
+							if( i == 0 )
+								return "translate(" + arc.centroid(d) + ")";
+							var r = 0;
+							if( (d.x+d.dx/2)/Math.PI*180 < 180 )  
+								r = 180 * ((d.x + d.dx / 2 - Math.PI / 2) / Math.PI);
+							else 
+								r = 180 * ((d.x + d.dx / 2 + Math.PI / 2) / Math.PI);
+							return  "translate(" + arc.centroid(d) + ")" +
+									"rotate(" + r + ")";
+					}) 
+					.text(function(d) { 
+							if(d.depth<3){
+								return d.name; 
+							}
+						}); 	
+			});
+		</script>
+  </body>  
 </html>  
