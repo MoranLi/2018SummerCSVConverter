@@ -169,8 +169,10 @@
                     outsideAngle = d3.scale.linear().domain([0, 2 * Math.PI]);
             
                 function insideArc(d) {
-                    return p.key > d.key
-                        ? {depth: d.depth - 1, x: 0, dx: 0} : p.key < d.key
+                    return 
+                        p.key > d.key
+                        ? {depth: d.depth - 1, x: 0, dx: 0} : 
+                        p.key < d.key
                         ? {depth: d.depth - 1, x: 2 * Math.PI, dx: 0}
                         : {depth: 0, x: 0, dx: 2 * Math.PI};
                 }

@@ -4,73 +4,12 @@
   	<meta charset="utf-8">  
 		<title>Circle - Partition</title>
 		<link rel="stylesheet" type="text/css" href="lib/d3.slider.css">
-		<script src="http://d3js.org/d3.v3.min.js"></script>
+		<script src="http://d3js.org/d3.v3.js"></script>
 		<script src="lib/d3.slider.js"></script>  
 	</head> 
 	<body>
 		<div id="slider" style="position: relative; top:20px; height: 100px; "></div>
 		<script>
-			// slider function
-			var slider_function = function (slider){
-				// value of slider
-				var value = slider.value();
-				// reinitialize root
-				var temp_root = JSON.parse(JSON.stringify(input));
-				// specific number of file been displayed for each type
-				var type1FileNum = Math.round(value * input.children[0].children.length / total_file);
-				var type2FileNum = Math.round(value * input.children[1].children.length / total_file);
-				var type3FileNum = Math.round(value * input.children[2].children.length / total_file);
-				// slice first n element to keep original proportion
-				temp_root.children[0].children = temp_root.children[0].children.slice(0,type1FileNum);
-				temp_root.children[1].children = temp_root.children[1].children.slice(0,type2FileNum);
-				temp_root.children[2].children = temp_root.children[2].children.slice(0,type3FileNum);
-				// copy from zooming
-				if (document.documentElement.__transition__) return;
-				// Rescale outside angles to match the new layout.
-				var enterArc,
-						exitArc,
-						outsideAngle = d3.scale.linear().domain([0, 2 * Math.PI]);
-				function insideArc(d) {
-						return p.key > d.key
-								? {depth: d.depth - 1, x: 0, dx: 0} : p.key < d.key
-								? {depth: d.depth - 1, x: 2 * Math.PI, dx: 0}
-								: {depth: 0, x: 0, dx: 2 * Math.PI};
-				}
-				function outsideArc(d) {
-						return {depth: d.depth + 1, x: outsideAngle(d.x), dx: outsideAngle(d.x + d.dx) - outsideAngle(d.x)};
-				}
-				// reset path and text base on new root
-				path = path.data(partition.nodes(temp_root).slice(1), function(d) { return d.key; });
-				text = text.data(partition.nodes(temp_root).slice(1), function(d) { return d.key; })
-				// transition
-				d3.transition().duration(d3.event.altKey ? 7500 : 750).each(function() {
-					path.exit().transition()
-							.style("fill-opacity", function(d) { return 1 })
-							.attrTween("d", function(d) { return arcTween.call(this, exitArc(d)); })
-							.remove();
-					path.enter().append("path")
-							.style("fill-opacity", function(d) { return 1 })
-							.style("fill", function(d) { return d.fill; })
-							.each(function(d) { this._current = enterArc(d); });
-					path.append("title")
-							.text(function(d){return d.name});
-					path.transition()
-							.style("fill-opacity", 1)
-							.attrTween("d", function(d) { return arcTween.call(this, updateArc(d)); });
-					text.exit()
-									.remove()    
-					text.enter()
-									.append("text")
-					text.style("font-size", "12px")
-							.style("font-family", "simsun")
-							.attr("text-anchor","middle")
-							.attr("transform",function(d,i){
-									return "translate(" + arc.centroid(d) + ")";
-							}) 
-							.text(function(d) { return d.name; })
-							.transition().delay(750).style("opacity", 1)
-				});
-			}
 			// initialzie visualization
 			var width = 800,
 					height = 800,
@@ -100,11 +39,22 @@
 						.outerRadius(function(d) { return Math.sqrt(d.y + d.dy); }
 			);
 
+			var enterClockwise = {
+				startAngle: 0,
+				endAngle: 0
+			};
+
+			var enterAntiClockwise = {
+				startAngle: Math.PI * 2,
+				endAngle: Math.PI * 2
+			};
+
 			// load data file
 			d3.json("data3.json", function(error, data) {
 				if(error)
 					console.log(error);
 				var root = data;
+				console.log(root)
 				input = JSON.parse(JSON.stringify(data));
 				// sorting files in type1/type2/type3 clone by number of clone chain
 				root.children[0].children.sort(function(a, b) {
@@ -122,10 +72,10 @@
 				total_display = total_file
 				// initialize slider
 				var num_ele = []
-				for( var i = 0;i<total_file+1;i++){
+				for( var i = 3;i<=total_file;i++){
 					num_ele.push(i)
 				}
-				var slider = d3.slider().min(0).max(total_file+1)
+				var slider = d3.slider().min(3).max(total_file)
 											.tickValues(num_ele).stepValues(num_ele).callback(slider_function);
 				d3.select("#slider").call(slider);
 				// initialize path and text
@@ -144,6 +94,14 @@
 					.attr("d", arc)
 					.style("stroke", "#fff")
 					.style("fill", function(d) { return color((d.children ? d : d.parent).name); })
+					.each(function(d) {
+						this._current = {
+							data: d.data,
+							value: d.value,
+							startAngle: enterClockwise.startAngle,
+							endAngle: enterClockwise.endAngle
+						}
+					})
 					.on("mouseover",function(d){
 						d3.select(this)
 							.style("fill","yellow");
@@ -177,6 +135,66 @@
 							}
 					}); 	
 			});
+			// slider function
+			var slider_function = function (slider){
+				// value of slider
+				var value = slider.value();
+				// reinitialize root
+				var temp_root = JSON.parse(JSON.stringify(input));
+				// specific number of file been displayed for each type
+				var type1FileNum = Math.round(value * input.children[0].children.length / total_file);
+				var type2FileNum = Math.round(value * input.children[1].children.length / total_file);
+				var type3FileNum = Math.round(value * input.children[2].children.length / total_file);
+				// slice first n element to keep original proportion
+				temp_root.children[0].children = temp_root.children[0].children.slice(0,type1FileNum);
+				temp_root.children[1].children = temp_root.children[1].children.slice(0,type2FileNum);
+				temp_root.children[2].children = temp_root.children[2].children.slice(0,type3FileNum);
+				// reset path and text base on new root
+				console.log(temp_root)
+				path = path.data(partition.nodes(temp_root), function(d) { return d.name; });
+				console.log(path)
+				text = text.data(partition.nodes(temp_root), function(d) { return d.name; });
+				
+				// transition
+				//d3.transition().duration(d3.event.altKey ? 7500 : 750).each(function() {
+					path.enter()
+							.append("path")
+							.style("fill-opacity", function(d) { return 1 })
+							.style("fill", function(d) { return d.fill; })
+							.attr("d", arc(enterAntiClockwise))
+							.each(function (d) {
+								this._current = {
+									data: d.data,
+									value: d.value,
+									startAngle: enterAntiClockwise.startAngle,
+									endAngle: enterAntiClockwise.endAngle
+								};
+							}); // store the initial values
+					console.log(path)
+					path.exit().transition()
+							.style("fill-opacity", function(d) { return 1 })
+							.attrTween('d', arcTweenOut)
+							.remove();
+					console.log(path)
+					path.append("title")
+							.text(function(d){return d.name});
+					path.transition()
+							.style("fill-opacity", 1)
+							.attrTween("d", arcTween)
+					text.exit()
+									.remove()    
+					text.enter()
+									.append("text")
+					text.style("font-size", "12px")
+							.style("font-family", "simsun")
+							.attr("text-anchor","middle")
+							.attr("transform",function(d,i){
+									return "translate(" + arc.centroid(d) + ")";
+							}) 
+							.text(function(d) { return d.name; })
+							.transition().delay(750).style("opacity", 1)
+				//});
+			}
 			function arcTween(b) {
 				var i = d3.interpolate(this._current, b);
 				this._current = i(0);
@@ -184,7 +202,13 @@
 						return arc(i(t));
 				};
 			}
-			
+			function arcTweenOut(a) {
+				var i = d3.interpolate(this._current, {startAngle: Math.PI * 2, endAngle: Math.PI * 2, value: 0});
+				this._current = i(0);
+				return function (t) {
+					return arc(i(t));
+				};
+			}
 			function updateArc(d) {
 				return {depth: d.depth, x: d.x, dx: d.dx};
 			}
