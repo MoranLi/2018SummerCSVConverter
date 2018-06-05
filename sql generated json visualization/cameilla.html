@@ -3,8 +3,8 @@
 	<head>
   	<meta charset="utf-8">  
 		<title>Circle - Partition</title>
-		<link rel="stylesheet" type="text/css" href="lib/d3.slider.css">
 		<script src="http://d3js.org/d3.v3.js"></script>
+		<link rel="stylesheet" type="text/css" href="lib/d3.slider.css">
 		<script src="lib/d3.slider.js"></script>  
 	</head> 
 	<body>
@@ -31,7 +31,7 @@
 							.sort(null)
 							.size([2 * Math.PI, radius * radius])
 							.value(function(d) { return 1; });
-							
+
 			var arc = d3.svg.arc()
 						.startAngle(function(d) { return d.x; })
 						.endAngle(function(d) { return d.x + d.dx; })
@@ -53,44 +53,116 @@
 			d3.json("data3.json", function(error, data) {
 				if(error)
 					console.log(error);
-				var root = data;
-				console.log(root)
-				input = JSON.parse(JSON.stringify(data));
+				var data = data;
+				console.log(data)
+				var slider_function = function (slider){
+					document.getElementsByTagName("g")[23].innerHTML= "";
+					// value of slider
+					var value = slider.value();
+					d3.json("data3.json",function(error,data){
+						if(error)
+							console.log(error);
+						// specific number of file been displayed for each type
+						var type1FileNum = Math.round(value * data.children[0].children.length / total_file);
+						var type2FileNum = Math.round(value * data.children[1].children.length / total_file);
+						var type3FileNum = Math.round(value * data.children[2].children.length / total_file);
+						// slice first n element to keep original proportion
+						data.children[0].children = data.children[0].children.slice(0,type1FileNum);
+						data.children[1].children = data.children[1].children.slice(0,type2FileNum);
+						data.children[2].children = data.children[2].children.slice(0,type3FileNum);
+						// reset path and text base on new data
+						//console.log(data)
+						var new_nodes = partition.nodes(data)
+						// transition
+						path = svg
+							.selectAll("path")
+							.data(new_nodes.slice(1))
+							.enter()
+							.append("path")
+							.attr("d", arc)
+							.style("stroke", "#fff")
+							.style("fill", function(d) { return color((d.children ? d : d.parent).name); })
+							.each(function(d) {
+								this._current = {
+									data: d.data,
+									value: d.value,
+									startAngle: enterClockwise.startAngle,
+									endAngle: enterClockwise.endAngle
+								}
+							})
+							.on("mouseover",function(d){
+								d3.select(this)
+									.style("fill","yellow");
+							})
+							.on("mouseout",function(d){
+								d3.select(this)
+									.transition()
+									.duration(200)
+									.style("fill", function(d) { 
+										return color((d.children ? d : d.parent).name); 
+									});
+							});
+						text = svg
+							.selectAll("text")
+							.data(new_nodes.slice(1))
+							.enter()
+							.append("text")  
+							.style("font-size", "12px")
+							.style("font-family", "simsun")
+							.attr("text-anchor","middle")
+							.attr("transform",function(d,i){
+									if( i == 0 )
+										return "translate(" + arc.centroid(d) + ")";
+									var r = 0;
+									if( (d.x+d.dx/2)/Math.PI*180 < 180 )  
+										r = 180 * ((d.x + d.dx / 2 - Math.PI / 2) / Math.PI);
+									else 
+										r = 180 * ((d.x + d.dx / 2 + Math.PI / 2) / Math.PI);
+									return  "translate(" + arc.centroid(d) + ")" +
+											"rotate(" + r + ")";
+							}) 
+							.text(function(d) { 
+									if(d.depth<3){
+										return d.name; 
+									}
+							}); 	
+					});
+				}
+
 				// sorting files in type1/type2/type3 clone by number of clone chain
-				root.children[0].children.sort(function(a, b) {
+				data.children[0].children.sort(function(a, b) {
 					return b.children.length - a.children.length;
 				})
-				root.children[1].children.sort(function(a, b) {
+				data.children[1].children.sort(function(a, b) {
 					return b.children.length - a.children.length;
 				})
-				root.children[2].children.sort(function(a, b) {
+				data.children[2].children.sort(function(a, b) {
 					return b.children.length - a.children.length;
 				})
 				// total number of files from sources
-				total_file = root.children[0].children.length+root.children[1].children.length+root.children[2].children.length;
+				total_file = data.children[0].children.length+data.children[1].children.length+data.children[2].children.length;
 				// total number of file display
 				total_display = total_file
 				// initialize slider
 				var num_ele = []
-				for( var i = 3;i<=total_file;i++){
+				for( var i = 3;i<=total_file+1;i++){
 					num_ele.push(i)
 				}
-				var slider = d3.slider().min(3).max(total_file)
+				var slider = d3.slider().min(3).max(total_file+1)
 											.tickValues(num_ele).stepValues(num_ele).callback(slider_function);
 				d3.select("#slider").call(slider);
+				// initialize slider		
+				partition
+					.value(function(d) { return 1; })
+					.nodes(data);
+				partition.children(function(d, depth) { return depth < 3 ? d.children : null; })
 				// initialize path and text
-				var nodes = partition.nodes(root);
-				var links = partition.links(nodes);
-				var arcs = svg.selectAll("g")
-								.data(nodes)
-								.enter().append("g");
-				path = arcs.append("path")
-					.attr("display", function(d) { 
-							if(d.depth < 3){
-								return null;
-							}
-							return "none";
-						})
+				var nodes = partition.nodes(data);
+				path = svg
+					.selectAll("path")
+          .data(nodes.slice(1))
+          .enter()
+					.append("path")
 					.attr("d", arc)
 					.style("stroke", "#fff")
 					.style("fill", function(d) { return color((d.children ? d : d.parent).name); })
@@ -114,87 +186,24 @@
 								return color((d.children ? d : d.parent).name); 
 							});
 					});
-				text = arcs.append("text")  
+				text = svg
+					.selectAll("text")
+          .data(nodes.slice(1))
+          .enter()
+					.append("text")  
 					.style("font-size", "12px")
 					.style("font-family", "simsun")
 					.attr("text-anchor","middle")
 					.attr("transform",function(d,i){
-							if( i == 0 )
-								return "translate(" + arc.centroid(d) + ")";
-							var r = 0;
-							if( (d.x+d.dx/2)/Math.PI*180 < 180 )  
-								r = 180 * ((d.x + d.dx / 2 - Math.PI / 2) / Math.PI);
-							else 
-								r = 180 * ((d.x + d.dx / 2 + Math.PI / 2) / Math.PI);
-							return  "translate(" + arc.centroid(d) + ")" +
-									"rotate(" + r + ")";
+						return "translate(" + arc.centroid(d) + ")";
 					}) 
 					.text(function(d) { 
-							if(d.depth<3){
-								return d.name; 
-							}
-					}); 	
+						if(d.depth<3){
+							return d.name; 
+						}
+					});				
 			});
 			// slider function
-			var slider_function = function (slider){
-				// value of slider
-				var value = slider.value();
-				// reinitialize root
-				var temp_root = JSON.parse(JSON.stringify(input));
-				// specific number of file been displayed for each type
-				var type1FileNum = Math.round(value * input.children[0].children.length / total_file);
-				var type2FileNum = Math.round(value * input.children[1].children.length / total_file);
-				var type3FileNum = Math.round(value * input.children[2].children.length / total_file);
-				// slice first n element to keep original proportion
-				temp_root.children[0].children = temp_root.children[0].children.slice(0,type1FileNum);
-				temp_root.children[1].children = temp_root.children[1].children.slice(0,type2FileNum);
-				temp_root.children[2].children = temp_root.children[2].children.slice(0,type3FileNum);
-				// reset path and text base on new root
-				console.log(temp_root)
-				path = path.data(partition.nodes(temp_root), function(d) { return d.name; });
-				console.log(path)
-				text = text.data(partition.nodes(temp_root), function(d) { return d.name; });
-				
-				// transition
-				//d3.transition().duration(d3.event.altKey ? 7500 : 750).each(function() {
-					path.enter()
-							.append("path")
-							.style("fill-opacity", function(d) { return 1 })
-							.style("fill", function(d) { return d.fill; })
-							.attr("d", arc(enterAntiClockwise))
-							.each(function (d) {
-								this._current = {
-									data: d.data,
-									value: d.value,
-									startAngle: enterAntiClockwise.startAngle,
-									endAngle: enterAntiClockwise.endAngle
-								};
-							}); // store the initial values
-					console.log(path)
-					path.exit().transition()
-							.style("fill-opacity", function(d) { return 1 })
-							.attrTween('d', arcTweenOut)
-							.remove();
-					console.log(path)
-					path.append("title")
-							.text(function(d){return d.name});
-					path.transition()
-							.style("fill-opacity", 1)
-							.attrTween("d", arcTween)
-					text.exit()
-									.remove()    
-					text.enter()
-									.append("text")
-					text.style("font-size", "12px")
-							.style("font-family", "simsun")
-							.attr("text-anchor","middle")
-							.attr("transform",function(d,i){
-									return "translate(" + arc.centroid(d) + ")";
-							}) 
-							.text(function(d) { return d.name; })
-							.transition().delay(750).style("opacity", 1)
-				//});
-			}
 			function arcTween(b) {
 				var i = d3.interpolate(this._current, b);
 				this._current = i(0);
