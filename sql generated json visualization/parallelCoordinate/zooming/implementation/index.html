@@ -1,0 +1,245 @@
+<!doctype html>
+<meta charset="utf-8"/>
+<title>Linking to Data Table</title>
+<link rel="stylesheet" type="text/css" href="lib/d3.parcoords.css">
+<link rel="stylesheet" type="text/css" href="lib/style.css">
+<link rel="stylesheet" type="text/css" href="lib/d3.slider.css">
+<style>
+/* data table styles */
+    #grid { height: 198px; width: 600px;}   /* grid width 200*/
+    .row, .header { clear: left; font-size: 20px; line-height: 20px; height: 25px; }  /* row height 30*/
+    .row:nth-child(odd) { background: rgba(0,0,0,0.05); }
+    .header { font-weight: bold; line-height: 20px; font-size: 25px; height: 40px}
+    .cell { float: left; overflow: hidden; white-space: nowrap; width: 200px; height: 22px; }
+    .col-0 { width: 100px; }
+
+    table {
+      width: 90%;
+      position: absolute; left:60px; bottom: 100px;
+      font-size: 20px
+    }
+    th, td {
+       text-align: center;
+    }
+
+</style>
+<script src="lib/d3.min.js"></script>
+<script src="lib/d3.parcoords.js"></script>
+<script src="lib/divgrid.js"></script>
+<script src="lib/d3.slider.js"></script>
+<button id="Child0">switch first 10% child!</button>
+<button id="Child1">switch second 10% child!</button>
+<button id="Child2">switch third 10% child!</button>
+<button id="Child3">switch fourth 10% child!</button>
+<button id="Child4">switch fifth 10% child!</button>
+<button id="parent">switch parent!</button>
+<button id="Child5">switch sixth 10% child!</button>
+<button id="Child6">switch seventh 10% child!</button>
+<button id="Child7">switch eighth 10% child!</button>
+<button id="Child8">switch ninth 10% child!</button>
+<button id="Child9">switch tenth 10% child!</button>
+<div id="example" class="parcoords" style="height:350px;"></div>
+<div id="grid" style="position: relative; top:20px"></div>
+<script id="brushing">
+
+    var blue_to_brown = d3.scale.linear()
+        .domain([0, 1000])
+        .range(["steelblue", "brown"])
+        .interpolate(d3.interpolateLab);
+
+    var color = function(d) { return blue_to_brown(d["Name"]); };
+
+    var parcoords = d3.parcoords()("#example")
+        .color(color)
+        .alpha(0.4);
+
+    // copy of data load from data set
+    var data;
+    // max number of dimension shown in pc
+    var max_dimension = 10;
+    // total dimension of system
+    var dimension;
+    // current dimension of system
+    var current_dimension;
+    // record child index to zoom out
+    var child_index = [];
+    //start revision of system
+    var start_point;
+
+//*******************************************************************************
+// Main Function: load csv file and read data for country_year_totalMedal dict***
+//*******************************************************************************
+    d3.json('data/carol.json', function(raw_data) {
+
+        data = Object.assign(raw_data)
+
+        dimension = Object.keys(raw_data[0]).length
+
+        current_dimension = dimension
+
+        start_point = Object.keys(raw_data[0])[0]
+
+        console.log(start_point)
+
+        console.log(raw_data)
+
+        var mod_data = [];
+
+        for(var i=0;i<raw_data.length;i++){
+            mod_data.push(re_data(0,dimension,raw_data[i]))
+        }
+
+        parcoords
+            .data(mod_data)
+            .hideAxis(["Name","StartRevision","EndRevision"])
+            .render()
+            .brushMode("1D-axes");  
+
+
+    //************************************************
+    // create data table, row hover highlighting *****
+    //************************************************
+        var grid = d3.divgrid(["Name","StartRevision","EndRevision"]);
+        d3.select("#grid")
+            .datum(mod_data.slice(0,20))
+            .call(grid)
+            .selectAll(".row")
+            // TODO
+            .on('click', function(d) { alert(d["Name"])})
+            .on({
+                "mouseover": function(d) { parcoords.highlight([d]) },
+                "mouseout": parcoords.unhighlight
+            });
+
+    //************************************************
+    // update data table on brush event **************
+    //************************************************
+        parcoords.on("brush", function(d) {
+            d3.select("#grid")
+                .datum(d.slice(0,20))
+                .call(grid)
+                .selectAll(".row")
+                // TODO
+                .on('click', function(d) { alert(d["Name"])})
+                .on({
+                    "mouseover": function(d) { parcoords.highlight([d]) },
+                    "mouseout": parcoords.unhighlight
+                });
+        });
+
+        
+        for(var i=0;i<10;i++){
+            document.getElementById("Child"+i).addEventListener("click",function(){
+                switchData(i);
+            })
+        }
+        document.getElementById("parent").addEventListener("click",function(){
+            switchData(-1);
+        })
+
+  });
+
+    function re_data(start,dimension,chain){
+        var newData = {};
+        var j = 1;
+        newData["0"] = 0;
+        for(var i=start;i<=max_dimension;i++){
+            var index = Math.round(dimension*i/max_dimension);
+            var sum = 0;
+            var num = 0;
+            for(;j<index;j++){
+                var changecount = chain[j];
+                if (changecount>-1){
+                    sum+=changecount;
+                    num++;
+                }
+            }
+            if(num == 0){
+                newData[index] = -1;
+            }
+            else{
+                newData[index] = Math.round(sum/num);
+            }
+            j = index+1;
+        }
+        newData["Name"] = chain["Name"];
+        newData["StartRevision"] = chain ["StartRevision"];
+        newData["EndRevision"] = chain["EndRevision"];
+        return newData;
+    }
+
+    function switchData(where){
+        // clear current display
+        var myNode = document.getElementById("example");
+        while (myNode.firstChild) {
+            myNode.removeChild(myNode.firstChild);
+        }
+
+        parcoords = d3.parcoords()("#example")
+            .color(color)
+            .alpha(0.4);
+
+        new_data = Object.assign(data)
+
+        if(where == -1){
+            current_dimension = Math.round(current_dimension/2);
+        }
+        else{
+            current_dimension = current_dimension*2;
+            if(current_dimension> dimension){
+                current_dimension = dimension;
+            }
+        }
+
+        var mod_data = [];
+
+        for(var i=0;i<new_data.length;i++){
+            mod_data.push(re_data(current_dimension,new_data[i]))
+        }
+
+        console.log(mod_data)
+
+        parcoords
+            .data(mod_data)
+            .hideAxis(["Name","StartRevision","EndRevision"])
+            .render()
+            .brushMode("1D-axes");  
+
+
+        //************************************************
+        // create data table, row hover highlighting *****
+        //************************************************
+        var grid = d3.divgrid(["Name","StartRevision","EndRevision"]);
+        d3.select("#grid")
+            .datum(mod_data.slice(0,20))
+            .call(grid)
+            .selectAll(".row")
+            // TODO
+            .on('click', function(d) { alert(d["Name"])})
+            .on({
+                "mouseover": function(d) { parcoords.highlight([d]) },
+                "mouseout": parcoords.unhighlight
+            });
+
+        //************************************************
+        // update data table on brush event **************
+        //************************************************
+        parcoords.on("brush", function(d) {
+            d3.select("#grid")
+                .datum(d.slice(0,20))
+                .call(grid)
+                .selectAll(".row")
+                // TODO
+                .on('click', function(d) { alert(d["Name"])})
+                .on({
+                    "mouseover": function(d) { parcoords.highlight([d]) },
+                    "mouseout": parcoords.unhighlight
+                });
+        });
+
+
+
+    }
+
+</script>
+
