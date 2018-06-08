@@ -61,6 +61,8 @@
     var dimension;
     // record current level to zoom out
     var level;
+    // final level achievable
+    var final_level;
     // record index of parent
     var parent_index = []; 
     // record index of current data
@@ -71,7 +73,7 @@
 //*******************************************************************************
 // Main Function: load csv file and read data for country_year_totalMedal dict***
 //*******************************************************************************
-    d3.json('data/carol.json', function(raw_data) {
+    d3.json('data/camellia.json', function(raw_data) {
 
         data = Object.assign(raw_data)
 
@@ -80,6 +82,8 @@
         start_point = Object.keys(raw_data[0])[0]
 
         level = 0;
+
+        final_level = Math.round(Math.log10(dimension));
 
         current_index = 0;
 
@@ -198,6 +202,13 @@
     }
 
     function switchData(where){
+        // should not zoom out at root level
+        if(level == 0 && where == -1){
+            return;
+        }
+        if(level == final_level){
+            return;
+        }
         // clear current display
         var myNode = document.getElementById("example");
         while (myNode.firstChild) {
