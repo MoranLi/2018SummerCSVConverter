@@ -32,12 +32,12 @@
 <button id="Child2">switch third 10% child!</button>
 <button id="Child3">switch fourth 10% child!</button>
 <button id="Child4">switch fifth 10% child!</button>
-<button id="parent">switch parent!</button>
 <button id="Child5">switch sixth 10% child!</button>
 <button id="Child6">switch seventh 10% child!</button>
 <button id="Child7">switch eighth 10% child!</button>
 <button id="Child8">switch ninth 10% child!</button>
 <button id="Child9">switch tenth 10% child!</button>
+<button id="parent">switch parent!</button>
 <div id="example" class="parcoords" style="height:350px;"></div>
 <div id="grid" style="position: relative; top:20px"></div>
 <script id="brushing">
@@ -59,10 +59,12 @@
     var max_dimension = 10;
     // total dimension of system
     var dimension;
-    // current dimension of system
-    var current_dimension;
-    // record child index to zoom out
-    var child_index = [];
+    // record current level to zoom out
+    var level;
+    // record index of parent
+    var parent_index = []; 
+    // record index of current data
+    var current_index;
     //start revision of system
     var start_point;
 
@@ -75,9 +77,11 @@
 
         dimension = Object.keys(raw_data[0]).length
 
-        current_dimension = dimension
-
         start_point = Object.keys(raw_data[0])[0]
+
+        level = 0;
+
+        current_index = 0;
 
         console.log(start_point)
 
@@ -128,23 +132,48 @@
         });
 
         
-        for(var i=0;i<10;i++){
-            document.getElementById("Child"+i).addEventListener("click",function(){
-                switchData(i);
-            })
-        }
+        document.getElementById("Child0").addEventListener("click",function(){
+            switchData(0);
+        })
+        document.getElementById("Child1").addEventListener("click",function(){
+            switchData(1);
+        })
+        document.getElementById("Child2").addEventListener("click",function(){
+            switchData(2);
+        })
+        document.getElementById("Child3").addEventListener("click",function(){
+            switchData(3);
+        })
+        document.getElementById("Child4").addEventListener("click",function(){
+            switchData(4);
+        })
+        document.getElementById("Child5").addEventListener("click",function(){
+            switchData(5);
+        })
+        document.getElementById("Child6").addEventListener("click",function(){
+            switchData(6);
+        })
+        document.getElementById("Child7").addEventListener("click",function(){
+            switchData(7);
+        })
+        document.getElementById("Child8").addEventListener("click",function(){
+            switchData(8);
+        })
+        document.getElementById("Child9").addEventListener("click",function(){
+            switchData(9);
+        })
         document.getElementById("parent").addEventListener("click",function(){
             switchData(-1);
         })
 
   });
 
-    function re_data(start,dimension,chain){
+    function re_data(start,end,chain){
         var newData = {};
-        var j = 1;
+        var j = 0;
         newData["0"] = 0;
-        for(var i=start;i<=max_dimension;i++){
-            var index = Math.round(dimension*i/max_dimension);
+        for(var i=1;i<=max_dimension;i++){
+            var index = Math.round((end-start)/max_dimension*i+start);
             var sum = 0;
             var num = 0;
             for(;j<index;j++){
@@ -160,7 +189,7 @@
             else{
                 newData[index] = Math.round(sum/num);
             }
-            j = index+1;
+            j = index;
         }
         newData["Name"] = chain["Name"];
         newData["StartRevision"] = chain ["StartRevision"];
@@ -181,20 +210,31 @@
 
         new_data = Object.assign(data)
 
+        var start_index,
+            end_index;
+
         if(where == -1){
-            current_dimension = Math.round(current_dimension/2);
+            level--;
+            var parent = parent_index.pop();
+            current_index = parent;
+            start_index = (dimension/Math.pow(10,level))*parent
+            end_index = (dimension/Math.pow(10,level))*(parent+1)
+            if(end_index> dimension){
+                end_index = dimension;
+            }
         }
         else{
-            current_dimension = current_dimension*2;
-            if(current_dimension> dimension){
-                current_dimension = dimension;
-            }
+            parent_index.push(current_index);
+            current_index = where;
+            level++;
+            start_index = (dimension/(Math.pow(10,level-1))*parent_index[parent_index.length-1])+(dimension/Math.pow(10,level))*(where)
+            end_index = (dimension/(Math.pow(10,level-1))*parent_index[parent_index.length-1])+(dimension/Math.pow(10,level))*(where+1)
         }
 
         var mod_data = [];
 
         for(var i=0;i<new_data.length;i++){
-            mod_data.push(re_data(current_dimension,new_data[i]))
+            mod_data.push(re_data(start_index,end_index,new_data[i]))
         }
 
         console.log(mod_data)
