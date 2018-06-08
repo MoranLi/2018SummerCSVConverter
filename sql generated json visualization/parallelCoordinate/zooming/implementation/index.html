@@ -73,7 +73,7 @@
 //*******************************************************************************
 // Main Function: load csv file and read data for country_year_totalMedal dict***
 //*******************************************************************************
-    d3.json('data/camellia.json', function(raw_data) {
+    d3.json('data/carol.json', function(raw_data) {
 
         data = Object.assign(raw_data)
 
@@ -86,10 +86,6 @@
         final_level = Math.round(Math.log10(dimension));
 
         current_index = 0;
-
-        console.log(start_point)
-
-        console.log(raw_data)
 
         var mod_data = [];
 
@@ -238,17 +234,24 @@
             parent_index.push(current_index);
             current_index = where;
             level++;
-            start_index = (dimension/(Math.pow(10,level-1))*parent_index[parent_index.length-1])+(dimension/Math.pow(10,level))*(where)
-            end_index = (dimension/(Math.pow(10,level-1))*parent_index[parent_index.length-1])+(dimension/Math.pow(10,level))*(where+1)
+            // calculate start axis of current level
+            var parent_point = 0;
+            for( var k =1;k<parent_index.length;k++){
+                parent_point+=(dimension/(Math.pow(10,level-k))*parent_index[k])
+            }
+            // add the index * number of item per index
+            start_index = parent_point+(dimension/Math.pow(10,level))*(where)
+            end_index = parent_point+(dimension/Math.pow(10,level))*(where+1)
         }
+
+        console.log(start_index)
+        console.log(end_index)
 
         var mod_data = [];
 
         for(var i=0;i<new_data.length;i++){
             mod_data.push(re_data(start_index,end_index,new_data[i]))
         }
-
-        console.log(mod_data)
 
         parcoords
             .data(mod_data)
