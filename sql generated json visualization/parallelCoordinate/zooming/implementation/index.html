@@ -27,6 +27,7 @@
 <script src="lib/d3.parcoords.js"></script>
 <script src="lib/divgrid.js"></script>
 <script src="lib/d3.slider.js"></script>
+<!-- use child for zooming, futrue add zooming-->
 <button id="Child0">switch first 10% child!</button>
 <button id="Child1">switch second 10% child!</button>
 <button id="Child2">switch third 10% child!</button>
@@ -59,9 +60,9 @@
     var max_dimension = 10;
     // total dimension of system
     var dimension;
-    // record current level to zoom out
+    // record current level 
     var level;
-    // final level achievable
+    // final level achievable (log10(dimension))
     var final_level;
     // record index of parent
     var parent_index = []; 
@@ -69,36 +70,35 @@
     var current_index;
     //start revision of system
     var start_point;
+    // end revision of system
+    var end_point;
 
 //*******************************************************************************
-// Main Function: load csv file and read data for country_year_totalMedal dict***
+// Main Function: load json file and read datafor visualise***
 //*******************************************************************************
-    d3.json('data/carol.json', function(raw_data) {
+    d3.json('data/camellia.json', function(raw_data) {
 
-        data = Object.assign(raw_data)
-
-        dimension = Object.keys(raw_data[0]).length
-
-        start_point = Object.keys(raw_data[0])[0]
-
+        // initialize global variable
+        data = Object.assign(raw_data.clone_evolution)
+        start_point = raw_data.min_revision
+        end_point = raw_data.max_revision
+        dimension = end_point-start_point+1
         level = 0;
-
         final_level = Math.round(Math.log10(dimension));
-
         current_index = 0;
 
+        // modify data to fit first level
         var mod_data = [];
-
-        for(var i=0;i<raw_data.length;i++){
-            mod_data.push(re_data(0,dimension,raw_data[i]))
+        for(var i=0;i<raw_data.clone_evolution.length;i++){
+            mod_data.push(re_data(start_point,end_point,raw_data.clone_evolution[i]))
         }
 
+        // initialize parallel coordinate
         parcoords
             .data(mod_data)
             .hideAxis(["Name","StartRevision","EndRevision"])
             .render()
             .brushMode("1D-axes");  
-
 
     //************************************************
     // create data table, row hover highlighting *****
@@ -131,7 +131,8 @@
                 });
         });
 
-        
+        // add event listener to each button
+        // will remove in future, using zooming
         document.getElementById("Child0").addEventListener("click",function(){
             switchData(0);
         })
@@ -169,11 +170,18 @@
   });
 
     function re_data(start,end,chain){
+        // returned data
         var newData = {};
         var j = 0;
-        newData["0"] = 0;
-        for(var i=1;i<=max_dimension;i++){
-            var index = Math.round((end-start)/max_dimension*i+start);
+        // newData["0"] = 0;
+        for(var i=0;i<=max_dimension;i++){
+            var index;
+            if( i == 0 ){
+                index = start;
+            }
+            else {
+                index = Math.round((end-start)/max_dimension*i+start);
+            }
             var sum = 0;
             var num = 0;
             for(;j<index;j++){
@@ -224,8 +232,8 @@
             level--;
             var parent = parent_index.pop();
             current_index = parent;
-            start_index = (dimension/Math.pow(10,level))*parent
-            end_index = (dimension/Math.pow(10,level))*(parent+1)
+            start_index = Math.round((dimension/Math.pow(10,level))*(parent)+start_point);
+            end_index = Math.round((dimension/Math.pow(10,level))*(parent+1)+start_point);
             if(end_index> dimension){
                 end_index = dimension;
             }
@@ -235,17 +243,17 @@
             current_index = where;
             level++;
             // calculate start axis of current level
-            var parent_point = 0;
+            var parent_point = start_point;
             for( var k =1;k<parent_index.length;k++){
                 parent_point+=(dimension/(Math.pow(10,level-k))*parent_index[k])
             }
             // add the index * number of item per index
-            start_index = parent_point+(dimension/Math.pow(10,level))*(where)
-            end_index = parent_point+(dimension/Math.pow(10,level))*(where+1)
+            start_index = Math.round(parent_point+(dimension/Math.pow(10,level))*(where));
+            end_index = Math.round(parent_point+(dimension/Math.pow(10,level))*(where+1));
+            
+            console.log(start_index)
+            console.log(end_index)
         }
-
-        console.log(start_index)
-        console.log(end_index)
 
         var mod_data = [];
 
