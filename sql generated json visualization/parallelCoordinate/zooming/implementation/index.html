@@ -174,7 +174,15 @@
         var newData = {};
         var j = 0;
         // newData["0"] = 0;
-        for(var i=0;i<=max_dimension;i++){
+        var temp_dimension;
+        if(max_dimension < end-start){
+            temp_dimension = max_dimension
+        }
+        else{
+            temp_dimension = end-start
+        }
+        console.log(temp_dimension)
+        for(var i=0;i<=temp_dimension;i++){
             var index;
             if( i == 0 ){
                 index = start;
