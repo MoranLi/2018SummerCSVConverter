@@ -188,7 +188,7 @@
                 index = start;
             }
             else {
-                index = Math.round((end-start)/max_dimension*i+start);
+                index = Math.round((end-start)/temp_dimension*i+start);
             }
             var sum = 0;
             var num = 0;
@@ -218,7 +218,7 @@
         if(level == 0 && where == -1){
             return;
         }
-        if(level == final_level){
+        if(level == final_level && where != -1){
             return;
         }
         // clear current display
