@@ -197,7 +197,7 @@
         else {
             document.getElementById("example").onmousewheel = function (event) {
                 event = event || window.event;
-                if(event.detail == -3){
+                if(event.wheelDelta > 0){
                     pathes.forEach(function(xs,i){
                         if(event.x < xs){
                             switchData(i-1);
