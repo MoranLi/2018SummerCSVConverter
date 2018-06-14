@@ -24,6 +24,7 @@
 
 </style>
 <script src="lib/d3.min.js"></script>
+<script src="lib/sylvester.src.js"></script>
 <script src="lib/d3.parcoords.js"></script>
 <script src="lib/divgrid.js"></script>
 <script src="lib/d3.slider.js"></script>
@@ -72,7 +73,13 @@
     var start_point;
     // end revision of system
     var end_point;
-
+    // record current paris exist ()
+    var current_pair;
+    // parallel coordinate right
+    var right;
+    // parallel coordinate left
+    var left;
+    
 //*******************************************************************************
 // Main Function: load json file and read datafor visualise***
 //*******************************************************************************
@@ -86,6 +93,7 @@
         level = 0;
         final_level = Math.round(Math.log10(dimension));
         current_index = 0;
+        current_pair = {};
 
         // modify data to fit first level
         var mod_data = [];
@@ -97,8 +105,10 @@
         parcoords
             .data(mod_data)
             .hideAxis(["Name","StartRevision","EndRevision"])
+            .smoothness(0)
+            .nullValueSeparator("bottom")
             .render()
-            .brushMode("1D-axes");  
+            .brushMode("1D-axes");
 
     //************************************************
     // create data table, row hover highlighting *****
@@ -167,13 +177,36 @@
             switchData(-1);
         })
 
+        var leftMostPath = document.getElementsByTagName("path")[0].getBoundingClientRect();
+        left = (leftMostPath.left + leftMostPath.right) / 2
+
+        var rightMostPath = document.getElementsByTagName("path")[10].getBoundingClientRect();
+        right = (rightMostPath.left + rightMostPath.right) / 2
+
+        console.log(left)
+
+        console.log(right)
+        
+        if(navigator.userAgent.indexOf("Firefox") > -1){
+            document.getElementById("example").addEventListener("DOMMouseScroll", function(event) {
+                console.log(event.x)
+            });
+        }
+        else {
+            document.getElementById("example").onmousewheel = function (event) {
+                event = event || window.event;
+                console.log(event.x)
+            }
+        }
+
+        
+
   });
 
     function re_data(start,end,chain){
         // returned data
         var newData = {};
         var j = 0;
-        // newData["0"] = 0;
         var temp_dimension;
         if(max_dimension < end-start){
             temp_dimension = max_dimension
@@ -181,13 +214,14 @@
         else{
             temp_dimension = end-start
         }
-        console.log(temp_dimension)
         for(var i=0;i<=temp_dimension;i++){
             var index;
+            // avoid situation divided by 0 
             if( i == 0 ){
                 index = start;
             }
             else {
+                // calculate index by range*i/10+start
                 index = Math.round((end-start)/temp_dimension*i+start);
             }
             var sum = 0;
@@ -258,9 +292,6 @@
             // add the index * number of item per index
             start_index = Math.round(parent_point+(dimension/Math.pow(10,level))*(where));
             end_index = Math.round(parent_point+(dimension/Math.pow(10,level))*(where+1));
-            
-            console.log(start_index)
-            console.log(end_index)
         }
 
         var mod_data = [];
@@ -272,6 +303,7 @@
         parcoords
             .data(mod_data)
             .hideAxis(["Name","StartRevision","EndRevision"])
+            .nullValueSeparator("bottom")
             .render()
             .brushMode("1D-axes");  
 
@@ -306,8 +338,6 @@
                     "mouseout": parcoords.unhighlight
                 });
         });
-
-
 
     }
 
