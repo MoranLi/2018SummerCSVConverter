@@ -75,10 +75,8 @@
     var end_point;
     // record current paris exist ()
     var current_pair;
-    // parallel coordinate right
-    var right;
-    // parallel coordinate left
-    var left;
+    // parallel coordinate each path x axis
+    var pathes = [];
     
 //*******************************************************************************
 // Main Function: load json file and read datafor visualise***
@@ -177,25 +175,38 @@
             switchData(-1);
         })
 
-        var leftMostPath = document.getElementsByTagName("path")[0].getBoundingClientRect();
-        left = (leftMostPath.left + leftMostPath.right) / 2
-
-        var rightMostPath = document.getElementsByTagName("path")[10].getBoundingClientRect();
-        right = (rightMostPath.left + rightMostPath.right) / 2
-
-        console.log(left)
-
-        console.log(right)
+        Array.prototype.forEach.call(document.getElementsByTagName("path"),function(path){
+            var x = (path.getBoundingClientRect().left + path.getBoundingClientRect().right) / 2
+            pathes.push(x);
+        })
         
         if(navigator.userAgent.indexOf("Firefox") > -1){
             document.getElementById("example").addEventListener("DOMMouseScroll", function(event) {
-                console.log(event.x)
+                if(event.detail == -3){
+                    pathes.forEach(function(xs,i){
+                        if(event.x < xs){
+                            switchData(i-1);
+                        }
+                    })
+                }
+                else{
+                    switchData(-1);
+                }
             });
         }
         else {
             document.getElementById("example").onmousewheel = function (event) {
                 event = event || window.event;
-                console.log(event.x)
+                if(event.detail == -3){
+                    pathes.forEach(function(xs,i){
+                        if(event.x < xs){
+                            switchData(i-1);
+                        }
+                    })
+                }
+                else{
+                    switchData(-1);
+                }
             }
         }
 
