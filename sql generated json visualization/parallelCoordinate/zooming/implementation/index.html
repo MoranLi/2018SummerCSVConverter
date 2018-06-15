@@ -57,6 +57,8 @@
 
     // copy of data load from data set
     var data;
+    // current axis set
+    var current_data;
     // max number of dimension shown in pc
     var max_dimension = 10;
     // total dimension of system
@@ -94,14 +96,14 @@
         current_pair = {};
 
         // modify data to fit first level
-        var mod_data = [];
+        current_data = [];
         for(var i=0;i<raw_data.clone_evolution.length;i++){
-            mod_data.push(re_data(start_point,end_point,raw_data.clone_evolution[i]))
+            current_data.push(re_data(start_point,end_point,raw_data.clone_evolution[i]))
         }
 
         // initialize parallel coordinate
         parcoords
-            .data(mod_data)
+            .data(current_data)
             .hideAxis(["Name","StartRevision","EndRevision"])
             .smoothness(0)
             .nullValueSeparator("bottom")
@@ -113,7 +115,7 @@
     //************************************************
         var grid = d3.divgrid(["Name","StartRevision","EndRevision"]);
         d3.select("#grid")
-            .datum(mod_data.slice(0,20))
+            .datum(current_data.slice(0,20))
             .call(grid)
             .selectAll(".row")
             // TODO
@@ -295,14 +297,9 @@
             parent_index.push(current_index);
             current_index = where;
             level++;
-            // calculate start axis of current level
-            var parent_point = start_point;
-            for( var k =1;k<parent_index.length;k++){
-                parent_point+=(dimension/(Math.pow(10,level-k))*parent_index[k])
-            }
-            // add the index * number of item per index
-            start_index = Math.round(parent_point+(dimension/Math.pow(10,level))*(where));
-            end_index = Math.round(parent_point+(dimension/Math.pow(10,level))*(where+1));
+            // get start / end popint from data form last time
+            start_index = parseInt(Object.keys(current_data[0])[where]);
+            end_index = parseInt(Object.keys(current_data[0])[where+1]);
         }
 
         var mod_data = [];
@@ -310,6 +307,8 @@
         for(var i=0;i<new_data.length;i++){
             mod_data.push(re_data(start_index,end_index,new_data[i]))
         }
+
+        current_data = mod_data
 
         parcoords
             .data(mod_data)
