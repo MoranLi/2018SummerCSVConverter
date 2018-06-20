@@ -5,7 +5,7 @@
     <link rel="stylesheet" type="text/css" href="lib/d3.parcoords.css">
     <link rel="stylesheet" type="text/css" href="lib/style.css">
     <link rel="stylesheet" type="text/css" href="lib/d3.slider.css">
-    <script src="lib/d3.min.js"></script>
+    <script src="lib/d3.js"></script>
     <script src="lib/sylvester.src.js"></script>
     <script src="lib/d3.parcoords.js"></script>
     <script src="lib/divgrid.js"></script>
@@ -21,19 +21,23 @@
 
 <body>
     <!-- use buttons for zooming, futrue add zooming -->
-    <button id="Child0">switch first 10% child!</button>
-    <button id="Child1">switch second 10% child!</button>
-    <button id="Child2">switch third 10% child!</button>
-    <button id="Child3">switch fourth 10% child!</button>
-    <button id="Child4">switch fifth 10% child!</button>
-    <button id="Child5">switch sixth 10% child!</button>
-    <button id="Child6">switch seventh 10% child!</button>
-    <button id="Child7">switch eighth 10% child!</button>
-    <button id="Child8">switch ninth 10% child!</button>
-    <button id="Child9">switch tenth 10% child!</button>
-    <button id="parent">switch parent!</button>
-    <div id="example" class="parcoords" style="height:350px;"></div>
-    <div id="grid" style="position: relative; top:20px"></div>
+    <div id="example" class="parcoords" style="height:350px; max-width: 1000px"></div>
+    <div style="float: left;">
+        <div id="grid" style="position: relative; top:20px"></div>
+        <div style="padding-left:50px; width: 700px">
+            <button id="Child0">switch first 10% child!</button>
+            <button id="Child1">switch second 10% child!</button>
+            <button id="Child2">switch third 10% child!</button>
+            <button id="Child3">switch fourth 10% child!</button>
+            <button id="Child4">switch fifth 10% child!</button>
+            <button id="Child5">switch sixth 10% child!</button>
+            <button id="Child6">switch seventh 10% child!</button>
+            <button id="Child7">switch eighth 10% child!</button>
+            <button id="Child8">switch ninth 10% child!</button>
+            <button id="Child9">switch tenth 10% child!</button>
+            <button id="parent">switch parent!</button>
+        </div>
+    </div>
     <script>
         loadData('camellia');
     </script>

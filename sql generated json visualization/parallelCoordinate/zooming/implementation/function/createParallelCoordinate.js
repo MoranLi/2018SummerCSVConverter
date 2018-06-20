@@ -24,7 +24,7 @@ function createParallelCoordinate(data){
   // create data table, row hover highlighting 
   var grid = d3.divgrid(["Name","StartRevision","EndRevision"]);
   d3.select("#grid")
-    .datum(data.slice(0,20))
+    .datum(data.slice(0,5))
     .call(grid)
     .selectAll(".row")
     // TODO

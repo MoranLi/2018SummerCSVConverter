@@ -23,9 +23,21 @@ function loadData(name) {
     createParallelCoordinate(current_data);
     
     // initialize scrolling and button function
-    initializeButton();
-    initializePathAxis(pathes);
-    initializeScroll(pathes);
-      
+      // initializeButton();
+      // initializePathAxis(pathes);
+      // initializeScroll(pathes);
+
+    var canvas = document.getElementById("example").children
+
+    console.log(canvas)
+
+    for(var i=0;i<canvas.length;i++){
+      if(i<4){
+        //canvas[i].setAttribute("height","345");
+        //canvas[i].setAttribute("width","1139");
+      }
+      canvas[i].setAttribute("style","position: absolute");
+    }
+
   });
 }

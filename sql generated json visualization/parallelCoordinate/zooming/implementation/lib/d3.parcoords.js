@@ -61,7 +61,8 @@ var pc = function(selection) {
       .attr("width", __.width)
       .attr("height", __.height)
       .style("font", "14px sans-serif")
-      .style("position", "absolute")
+      // this line is commented because css have conflict with split.js
+      //.style("position", "absolute")
 
     .append("svg:g")
       .attr("transform", "translate(" + __.margin.left + "," + __.margin.top + ")");
@@ -662,12 +663,23 @@ function getNullPosition() {
 };
 
 function single_path(d, ctx) {
-	d3.entries(__.dimensions).forEach(function(p, i) {  //p isn't really p
+  d3.entries(__.dimensions).forEach(function(p, i) {  //p isn't really p
+    // 0.8 is a magic number to fit wdith of outer div
 		if (i == 0) {
-			ctx.moveTo(position(p.key), typeof d[p.key] =='undefined' ? getNullPosition() : __.dimensions[p.key].yscale(d[p.key]));
+			ctx.moveTo(position(p.key)*0.8, typeof d[p.key] =='undefined' ? getNullPosition() : __.dimensions[p.key].yscale(d[p.key]));
 		} else {
-			ctx.lineTo(position(p.key), typeof d[p.key] =='undefined' ? getNullPosition() : __.dimensions[p.key].yscale(d[p.key]));
-		}
+			// ctx.lineTo(position(p.key)*0.8, typeof d[p.key] =='undefined' ? getNullPosition() : __.dimensions[p.key].yscale(d[p.key]));
+      var xxxx = position(p.key)*0.8;
+      var yyyy;
+      if(typeof d[p.key] =='undefined'){
+        yyyy = getNullPosition();
+      }
+      else{
+        var yysss = __.dimensions[p.key].yscale;
+        yyyy = yysss(d[p.key])*0.85
+      }
+      ctx.lineTo(xxxx,yyyy)
+    }
 	});
 };
 
